@@ -1,0 +1,536 @@
+\documentclass[11pt]{article}
+\usepackage{fullpage,graphicx,float,amsmath,amsfonts,enumitem,fancyhdr,tikz}
+
+\setlist{parsep=5.5pt}
+\setlength{\parindent}{0pt}
+
+\newcommand\assignment{Stat 539 Homework 1}
+\newcommand\myname{Kenny Flagg}
+\newcommand\duedate{January 26, 2017}
+
+\pagestyle{fancy}
+\lhead{\assignment}
+\chead{\duedate}
+\rhead{\myname}
+\setlength{\headheight}{18pt}
+\setlength{\headsep}{2pt}
+
+\title{\assignment}
+\author{\myname}
+\date{\duedate}
+
+\begin{document}
+\maketitle
+
+<<setup, echo = FALSE, message = FALSE, cache = FALSE>>=
+library(knitr)
+library(extrafont)
+opts_chunk$set(echo = TRUE, comment = NA, message = FALSE,
+               show.signif.stars = FALSE,
+               fig.align = 'center', fig.width = 6.5, fig.height = 3,
+               fig.pos = 'H', size = 'footnotesize', dev = 'pdf',
+               dev.args = list(family = 'CM Roman', pointsize = 11))
+knit_theme$set('print')
+
+#library(xtable)
+options(xtable.floating = FALSE,
+        xtable.sanitize.rownames.function = function(x) x,
+        xtable.sanitize.colnames.function = function(x) x,
+        width = 80, scipen = 2, show.signif.stars = FALSE)
+@
+
+\begin{enumerate}
+
+\item%1
+{\it Agresti Exercise 1.4 (p.~21) Extend the model in Section 1.2.1 relating
+income to racial-ethnic status to include education and interaction explanatory
+terms. Explain how to interpret the parameters when software constructs the
+indicators using (\textbf{a}) first-category-baseline coding, (\textbf{b})
+last-category-baseline coding.}
+
+If \(x_{i3}\) is the number of years of schooling for the \(i\)th individual,
+the model becomes
+\begin{equation*}
+\mu_{i} = \beta_{0} + \beta_{1} x_{i1} + \beta_{2} x_{i2}
++ \beta_{3} x_{i3} + \beta_{4} x_{i1} x_{i3} + \beta_{5} x_{i2} x_{i3}.
+\end{equation*}
+
+\begin{enumerate}[label=(\textbf{\alph*})]
+
+\item%a
+With first-category-baseline, black is the baseline racial-ethnic status, so
+parameters for Hispanics and whites are interpreted relative to blacks.
+
+\begin{itemize}
+
+\item\(\beta_{0}\): The mean income for blacks with no schooling is
+\(\beta_{0}\).
+
+\item\(\beta_{1}\): The mean income for Hispanics with no schooling is
+\(\beta_{1}\) greater than the mean income for blacks with no schooling.
+
+\item\(\beta_{2}\): The mean income for whites with no schooling is
+\(\beta_{2}\) greater than the mean income for blacks with no schooling.
+
+\item\(\beta_{3}\): The mean income for blacks with a given number of years of
+schooling is \(\beta_{3}\) greater than the mean income for blacks with one
+fewer year of schooling.
+
+\item\(\beta_{4}\): The difference in mean income between Hispanics with a
+given number of years of schooling and Hispanics with one fewer year of
+schooling is \(\beta_{4}\) greater than the difference in mean income between
+blacks with a given number of years of schooling and blacks with one fewer
+year of schooling.
+
+\item\(\beta_{5}\): The difference in mean income between whites with a given
+number of years of schooling and whites with one fewer year of schooling is
+\(\beta_{5}\) greater than the difference in mean income between blacks with a
+given number of years of schooling and blacks with one fewer year of schooling.
+
+\end{itemize}
+
+\item%b
+With first-category-baseline, white is the baseline racial-ethnic status, so
+parameters for blacks and Hispanics are interpreted relative to whites.
+
+\begin{itemize}
+
+\item\(\beta_{0}\): The mean income for whites with no schooling is
+\(\beta_{0}\).
+
+\item\(\beta_{1}\): The mean income for blacks with no schooling is
+\(\beta_{1}\) greater than the mean income for whites with no schooling.
+
+\item\(\beta_{2}\): The mean income for Hispanics with no schooling is
+\(\beta_{2}\) greater than the mean income for whites with no schooling.
+
+\item\(\beta_{3}\): The mean income for whites with a given number of years of
+schooling is \(\beta_{3}\) greater than the mean income for whites with one
+fewer year of schooling.
+
+\item\(\beta_{4}\): The difference in mean income between blacks with a given
+number of years of schooling and blacks with one fewer year of schooling is
+\(\beta_{4}\) greater than the difference in mean income between whites with a
+given number of years of schooling and whites with one fewer year of schooling.
+
+\item\(\beta_{5}\): The difference in mean income between Hispanics with a
+given number of years of schooling and Hispanics with one fewer year of
+schooling is \(\beta_{5}\) greater than the difference in mean income between
+whites with a given number of years of schooling and whites with one fewer
+year of schooling.
+
+\end{itemize}
+
+\end{enumerate}
+
+\item%2
+{\it Agresti Exercise 1.8 (p.~22) A model \(M\) has model matrix
+\(\mathbf{X}\). A simpler model \(M_{0}\) results from removing the final term
+in \(M\), and hence has model matrix \(\mathbf{X}_{0}\) that deletes the final
+column from \(\mathbf{X}\). From the definition of a column space, explain why
+\(C(\mathbf{X}_{0})\) is contained in \(C(\mathbf{X})\).}
+
+Intuitively, \(C(\mathbf{X}_{0})\) is a subset of \(C(\mathbf{X})\) because
+its basis (the columns of \(\mathbf{X}_{0}\)) is a subset of the basis of
+\(C(\mathbf{X})\) (the columns of \(\mathbf{X}\)). Formally, if
+\(\boldsymbol{\mu} \in C(\mathbf{X}_{0})\) and \(\mathbf{x}_{m}\) is the final
+column of \(\mathbf{X}\) then
+\begin{align*}
+\boldsymbol{\mu} &= \mathbf{X}_{0} \boldsymbol{\beta}_{0} \\
+&= \mathbf{X}_{0} \boldsymbol{\beta}_{0} + \mathbf{x}_{m} \times 0 \\
+&= \begin{bmatrix} \mathbf{X}_{0} & \mathbf{x}_{m} \end{bmatrix}
+\begin{bmatrix} \boldsymbol{\beta}_{0} \\ 0 \end{bmatrix} \\
+&= \mathbf{X} \boldsymbol{\beta} \in C(\mathbf{X})
+\end{align*}
+with \(\boldsymbol{\beta} = \begin{bmatrix}\boldsymbol{\beta}_{0} \\
+0\end{bmatrix}\), so \(C(\mathbf{X}_{0}) \subset C(\mathbf{X})\).
+
+\item%3
+{\it Agresti Exercise 2.10 (p.~72) For a projection matrix \(\mathbf{P}\), for
+any \(\mathbf{y}\) in \(\mathbb{R}^{n}\) show that \(\mathbf{Py}\) and
+\(\mathbf{y-Py}\) are orthogonal vectors.}
+
+Using the fact that \(\mathbf{P}\) is a projection matrix if and only if
+\(\mathbf{P}\) is symmetric and idempotent (proved in Section 2.2.1),
+\begin{align*}
+(\mathbf{Py})^{T}(\mathbf{y-Py})
+&= \mathbf{y}^{T}\mathbf{P}^{T}(\mathbf{y-Py}) \\
+&= \mathbf{y}^{T}\mathbf{P}(\mathbf{y-Py}) \\
+&= \mathbf{y}^{T}\mathbf{Py}-\mathbf{y}^{T}\mathbf{P}^{2}\mathbf{y} \\
+&= \mathbf{y}^{T}\mathbf{Py}-\mathbf{y}^{T}\mathbf{P}\mathbf{y} \\
+&= 0
+\end{align*}
+so \(\mathbf{Py}\) and \(\mathbf{y-Py}\) are orthogonal.
+
+\item%4
+{\it Consider the following model: For \(i=1,\dots,n\),}
+\begin{equation*}
+y_{i}=\beta_{1}x_{i}+e_{i},
+\end{equation*}
+{\it where \(E(e_{i})=0\) and \(Var(e_{i})=\sigma^{2}\).}
+
+\begin{enumerate}
+
+\item%a
+{\it Write this model in the matrix form
+\(\mathbf{y}=\mathbf{X}\boldsymbol{\beta}+\mathbf{e}\), writing out the
+dimensions and elements of \(\mathbf{y}\), \(\mathbf{X}\),
+\(\boldsymbol{\beta}\), and \(\mathbf{e}\).}
+
+The matrix form of this model is
+\(\mathbf{y}=\mathbf{X}\boldsymbol{\beta}+\mathbf{e}\), where
+\(\displaystyle\mathbf{y} = \begin{bmatrix}
+y_{1} \\ y_{2} \\ \vdots \\ y_{n}
+\end{bmatrix}\) is \(n \times 1\),\\
+\(\displaystyle\mathbf{X} = \begin{bmatrix}
+x_{1} \\ x_{2} \\ \vdots \\ x_{n}
+\end{bmatrix}\) is \(n \times 1\),
+\(\displaystyle\boldsymbol{\beta} =
+\begin{bmatrix}\beta_{1}\end{bmatrix}\) is \(1 \times 1\), and
+\(\displaystyle\mathbf{e} = \begin{bmatrix}
+e_{1} \\ e_{2} \\ \vdots \\ e_{n}
+\end{bmatrix}\) is \(n \times 1\).
+
+\item%b
+{\it Derive the least squares estimate for \(\beta_{1}\),
+\(\hat{\beta}_{1}\).}
+
+We need to minimize
+\begin{equation*}
+\sum_{i=1}^{n}\left(y_{i}-\hat{y}_{i}\right)^{2}
+=\sum_{i=1}^{n}\left(y_{i}-\beta_{1}x_{i}\right)^2.
+\end{equation*}
+Taking the derivative,
+\begin{equation*}
+\frac{\partial}{\partial \beta_{1}}\sum_{i=1}^{n}\left(y_{i}-\hat{y}_{i}\right)
+= -2\sum_{i=1}^{n}x_{i}\left(y_{i}-\beta_{1}x_{i}\right).
+\end{equation*}
+Now we set the derivative equal to zero and solve,
+\begin{align*}
+-2\sum_{i=1}^{n}x_{i}\left(y_{i}-\beta_{1}x_{i}\right) &= 0 \\
+\sum_{i=1}^{n}x_{i}y_{i}-\beta_{1}\sum_{i=1}^{n}x_{i}^{2} &= 0
+\end{align*}
+so the OLS estimator is
+\begin{equation*}
+\hat{\beta}_{1} = \frac{\sum_{i=1}^{n}x_{i}y_{i}}{\sum_{i=1}^{n}x_{i}^{2}}.
+\end{equation*}
+(For thoroughness, I'll point out that the second derivative is positive for
+all \(\beta_{1}\) as long as some \(x_{i} \neq 0\), so this is in fact a
+minimum.)
+
+\pagebreak
+\item%c
+{\it Draw a plot (either by hand or with software) of \(E(Y|x)\) versus
+ \(x\).}
+
+\begin{center}\begin{tikzpicture}[x = 1in, y = 1in]
+\draw [ultra thick, <->] (-2, 0) -- (2, 0) node [right] {\(x\)};
+\draw [ultra thick, <->] (0, -1) -- (0, 1) node [above] {\(E(Y|x)\)};
+\draw [semithick, <->] (-2, -1) -- (2, 1) node [above] {\(E(Y|x)=\beta_{1}x\)};
+\draw [fill] (0, 0) circle [radius=0.04] node [above left] (0, 0) {\((0, 0)\)};
+\draw (0.75, 0.375) -- (1, 0.375) node [below] {\(1\)}
+-- (1.25, 0.375) -- (1.25, 0.5) node [right] {\(\beta_{1}\)}
+-- (1.25, 0.625);
+\end{tikzpicture}\end{center}
+
+\end{enumerate}
+
+
+\item%5
+{\it Patients with partial seizures were enrolled in a randomized clinical
+trial of the anti-epileptic drug, progabide. Participants were randomized to
+either progabide or a placebo. Prior to receiving treatment, baseline data on
+the number of seizures during the preceding 8-week interval were recorded.
+Counts of epileptic seizures during 2-week intervals before each of four
+successive post-randomization clinic visits were recorded. The main goal of
+the study was to compare the changes in the average rates of seizures in the
+two groups.}
+
+{\it Displayed below are the data for the first three and last three
+individuals in the data set, where the response listed in columns 4--8 is the
+rate of seizures per week for that individual at baseline (week 0), week 2,
+week 4, week 6, and week 8 (rate = count/8 for baseline measurement; rate =
+count/2 for post-baseline measurements):}
+\begin{verbatim}
+> head(epilepsy,3)
+    ID       trt   age  Week0 Week2 Week4 Week6 Week8
+1    1   Placebo    31  1.375   2.5   1.5   1.5   1.5
+2    2   Placebo    30  1.375   1.5   2.5   1.5   1.5
+3    3   Placebo    25  0.750   1.0   2.0   0.0   2.5
+> tail(epilepsy,3)
+     ID         trt   age  Week0 Week2 Week4 Week6 Week8
+57   57   Progabide    21  3.125   1.0   1.5   0.0   0.5
+58   58   Progabide    36  1.625   0.0   0.0   0.0   0.0
+59   59   Progabide    37  1.500   0.5   2.0   1.5   1.0
+\end{verbatim}
+{\it Define variables: \(Y_{ij}=j\)th rate measurement on the \(i\)th
+individual,}
+\begin{equation*}
+T_{i}=\begin{cases}
+1 & \text{individual }i\text{ was randomly assigned to Progabide} \\
+0 & \text{individual }i\text{ was randomly assigned to Placebo}
+\end{cases}
+\end{equation*}
+{\it and}
+\begin{equation*}
+w_{j}=\text{week of the }j\text{th measurement (e.g., }w_{1}=0\text{).}
+\end{equation*}
+{\it where \(i=1,\dots,59\), and \(j=1,\dots,n\). (Note that we are treating
+week as a quantitative variable.)}
+
+\begin{enumerate}
+
+\item%a
+{\it Is this study exploratory or confirmatory? Explain.}
+
+This study is confirmatory because the researchers selected one drug
+(progabide) for the treatment group, implying that they already had a
+hypothesis they wanted to test about progabide's effectiveness relative to a
+placebo.
+
+\item%b
+{\it For each of the following mean models expressed in scalar notation
+below,}
+
+\begin{enumerate}[label=\arabic*.]
+\item%1
+{\it write out the vector of regression parameters \(\boldsymbol{\beta}\)
+(the elements will be symbols)},
+\item%2
+{\it write out the rows of the design matrix \(\mathbf{X}\) that correspond to
+the observations on individuals 3 and 59 (the elements will be numbers),}
+\item%3
+{\it on a single well-labeled plot, draw two hypothetical mean response
+trajectories (assuming all elements of \(\boldsymbol{\beta}\) are non-zero),
+one for each treatment (Placebo and Progabide), with time (in weeks) on the
+\(x\)-axis, and the mean rate of seizures on the \(y\)-axis.}
+\end{enumerate}
+
+\begin{enumerate}
+
+\item%i
+\(E(Y_{ij})=\beta_{1}+\beta_{2}T_{i}\)
+\begin{equation*}
+\boldsymbol{\beta} = \begin{bmatrix}\beta_{1} \\ \beta_{2}\end{bmatrix},
+\qquad
+\mathbf{X}_{3} = \begin{bmatrix}1 & 0\end{bmatrix},
+\qquad
+\mathbf{X}_{59} = \begin{bmatrix}1 & 1\end{bmatrix}
+\end{equation*}
+Plot assuming \(\beta_{2} < 0\):
+<<prob5bi, echo = FALSE>>=
+par(las = 1, mar = c(4.1, 6.1, 0.1, 6.1))
+plot(NULL, xlim = c(0, 8), ylim = c(0, 4), bty = 'n', yaxt = 'n',
+     xaxs = 'i', yaxs = 'i',
+     xlab = expression(italic(w[j])), ylab = NA, main = NA)
+title(ylab = expression(italic(E(Y[ij]))), line = 4)
+abline(3, 0, lty = 1, lwd = 1)
+abline(2.5, 0, lty = 2, lwd = 2)
+axis(2, at = c(0, 2.5, 3, 4),
+     labels = c('0', expression(italic(beta[1]+beta[2])),
+		expression(italic(beta[1])), NA))
+legend('top', lty = c(2, 1), lwd = c(2, 1), horiz = TRUE, bty = 'n',
+       legend = c(expression(italic(T[i]==1)), expression(italic(T[i]==0))))
+@
+
+\pagebreak
+\item%ii
+\(E(Y_{ij})=\beta_{1}+\beta_{2}w_{j}\)
+\begin{equation*}
+\boldsymbol{\beta} = \begin{bmatrix}\beta_{1} \\ \beta_{2}\end{bmatrix},
+\qquad
+\mathbf{X}_{3} = \begin{bmatrix}
+1 & 0 \\
+1 & 2 \\
+1 & 4 \\
+1 & 6 \\
+1 & 8
+\end{bmatrix},
+\qquad
+\mathbf{X}_{59} = \begin{bmatrix}
+1 & 0 \\
+1 & 2 \\
+1 & 4 \\
+1 & 6 \\
+1 & 8
+\end{bmatrix}
+\end{equation*}
+Plot assuming \(\beta_{2} < 0\):
+<<prob5bii, echo = FALSE>>=
+par(las = 1, mar = c(4.1, 6.1, 0.1, 6.1))
+plot(NULL, xlim = c(0, 8), ylim = c(0, 4), bty = 'n', yaxt = 'n',
+     xaxs = 'i', yaxs = 'i',
+     xlab = expression(italic(w[j])), ylab = NA, main = NA)
+title(ylab = expression(italic(E(Y[ij]))), line = 4)
+abline(3, -0.25, lty = 1, lwd = 1)
+abline(3, -0.25, lty = 2, lwd = 2)
+axis(2, at = c(0, 3, 4),
+     labels = c('0', expression(italic(beta[1])), NA))
+segments(x0 = c(4, 5), x1 = c(5, 5), y0 = c(2, 2), y1 = c(2, 1.75))
+text(c(4.5, 5.25), c(2.125, 1.875), c('1', expression(italic(beta[2]))))
+legend('top', lty = c(2, 1), lwd = c(2, 1), horiz = TRUE, bty = 'n',
+       legend = c(expression(italic(T[i]==1)), expression(italic(T[i]==0))))
+@
+
+\item%iii
+\(E(Y_{ij})=\beta_{1}+\beta_{2}T_{i}+\beta_{3}w_{j}\)
+\begin{equation*}
+\boldsymbol{\beta} = \begin{bmatrix}
+\beta_{1} \\ \beta_{2} \\ \beta_{3}
+\end{bmatrix},
+\qquad
+\mathbf{X}_{3} = \begin{bmatrix}
+1 & 0 & 0 \\
+1 & 0 & 2 \\
+1 & 0 & 4 \\
+1 & 0 & 6 \\
+1 & 0 & 8
+\end{bmatrix},
+\quad
+\mathbf{X}_{59} = \begin{bmatrix}
+1 & 1 & 0 \\
+1 & 1 & 2 \\
+1 & 1 & 4 \\
+1 & 1 & 6 \\
+1 & 1 & 8
+\end{bmatrix}
+\end{equation*}
+Plot assuming \(\beta_{2} < 0\) and \(\beta_{3} < 0\):
+<<prob5biii, echo = FALSE>>=
+par(las = 1, mar = c(4.1, 6.1, 0.1, 6.1))
+plot(NULL, xlim = c(0, 8), ylim = c(0, 4), bty = 'n', yaxt = 'n',
+     xaxs = 'i', yaxs = 'i',
+     xlab = expression(italic(w[j])), ylab = NA, main = NA)
+title(ylab = expression(italic(E(Y[ij]))), line = 4)
+abline(3, -0.25, lty = 1, lwd = 1)
+abline(2.5, -0.25, lty = 2, lwd = 2)
+axis(2, at = c(0, 3, 2.5, 4),
+     labels = c('0', expression(italic(beta[1])),
+		expression(italic(beta[1]+beta[2])), NA))
+segments(x0 = c(4, 5), x1 = c(5, 5), y0 = c(2, 2), y1 = c(2, 1.75))
+text(c(4.5, 5.25), c(2.125, 1.875), c('1', expression(italic(beta[3]))))
+segments(x0 = c(4, 5), x1 = c(5, 5), y0 = c(1.5, 1.5), y1 = c(1.5, 1.25))
+text(c(4.5, 5.25), c(1.625, 1.375), c('1', expression(italic(beta[3]))))
+legend('top', lty = c(2, 1), lwd = c(2, 1), horiz = TRUE, bty = 'n',
+       legend = c(expression(italic(T[i]==1)), expression(italic(T[i]==0))))
+@
+
+\item%iv
+\(E(Y_{ij})=\beta_{1}+\beta_{2}w_{j}+\beta_{3}T_{i}\times w_{j}\)
+\begin{equation*}
+\boldsymbol{\beta} = \begin{bmatrix}
+\beta_{1} \\ \beta_{2} \\ \beta_{3}
+\end{bmatrix},
+\qquad
+\mathbf{X}_{3} = \begin{bmatrix}
+1 & 0 & 0 \\
+1 & 2 & 0 \\
+1 & 4 & 0 \\
+1 & 6 & 0 \\
+1 & 8 & 0
+\end{bmatrix},
+\qquad
+\mathbf{X}_{59} = \begin{bmatrix}
+1 & 0 & 0 \\
+1 & 2 & 2 \\
+1 & 4 & 4 \\
+1 & 6 & 6 \\
+1 & 8 & 8
+\end{bmatrix}
+\end{equation*}
+Plot assuming \(\beta_{2} < 0\) and \(\beta_{3} < 0\):
+<<prob5biv, echo = FALSE>>=
+par(las = 1, mar = c(4.1, 6.1, 0.1, 6.1))
+plot(NULL, xlim = c(0, 8), ylim = c(0, 4), bty = 'n', yaxt = 'n',
+     xaxs = 'i', yaxs = 'i',
+     xlab = expression(italic(w[j])), ylab = NA, main = NA)
+title(ylab = expression(italic(E(Y[ij]))), line = 4)
+abline(3, -0.125, lty = 1, lwd = 1)
+abline(3, -0.25, lty = 2, lwd = 2)
+axis(2, at = c(0, 3, 4), labels = c('0', expression(italic(beta[1])), NA))
+segments(x0 = c(4, 5), x1 = c(5, 5), y0 = c(2, 2), y1 = c(2, 1.75))
+text(c(4.5, 5.5), c(2.125, 1.875),
+     c('1', expression(italic(beta[2]+beta[3]))))
+segments(x0 = c(4, 5), x1 = c(5, 5), y0 = c(2.5, 2.5), y1 = c(2.5, 2.375))
+text(c(4.5, 5.25), c(2.675, 2.4375), c('1', expression(italic(beta[2]))))
+legend('top', lty = c(2, 1), lwd = c(2, 1), horiz = TRUE, bty = 'n',
+       legend = c(expression(italic(T[i]==1)), expression(italic(T[i]==0))))
+@
+
+\item%v
+\(E(Y_{ij})=\beta_{1}+\beta_{2}T_{i}+\beta_{3}w_{j}+\beta_{4}T_{i}\times w_{j}\)
+\begin{equation*}
+\boldsymbol{\beta} = \begin{bmatrix}
+\beta_{1} \\ \beta_{2} \\ \beta_{3} \\ \beta_{4}
+\end{bmatrix},
+\qquad
+\mathbf{X}_{3} = \begin{bmatrix}
+1 & 0 & 0 & 0 \\
+1 & 0 & 2 & 0 \\
+1 & 0 & 4 & 0 \\
+1 & 0 & 6 & 0 \\
+1 & 0 & 8 & 0
+\end{bmatrix},
+\qquad
+\mathbf{X}_{59} = \begin{bmatrix}
+1 & 1 & 0 & 0 \\
+1 & 1 & 2 & 2 \\
+1 & 1 & 4 & 4 \\
+1 & 1 & 6 & 6 \\
+1 & 1 & 8 & 8
+\end{bmatrix}
+\end{equation*}
+Plot assuming \(\beta_{2} < 0\), \(\beta_{3} < 0\), and \(\beta_{4} < 0\):
+<<prob5bv, echo = FALSE>>=
+par(las = 1, mar = c(4.1, 6.1, 0.1, 6.1))
+plot(NULL, xlim = c(0, 8), ylim = c(0, 4), bty = 'n', yaxt = 'n',
+     xaxs = 'i', yaxs = 'i',
+     xlab = expression(italic(w[j])), ylab = NA, main = NA)
+title(ylab = expression(italic(E(Y[ij]))), line = 4)
+abline(3, -0.125, lty = 1, lwd = 1)
+abline(2.5, -0.25, lty = 2, lwd = 2)
+axis(2, at = c(0, 3, 2.5, 4),
+     labels = c('0', expression(italic(beta[1])),
+                expression(italic(beta[1]+beta[3])), NA))
+segments(x0 = c(4, 5), x1 = c(5, 5), y0 = c(1.5, 1.5), y1 = c(1.5, 1.25))
+text(c(4.5, 5.5), c(1.625, 1.375),
+     c('1', expression(italic(beta[3]+beta[4]))))
+segments(x0 = c(4, 5), x1 = c(5, 5), y0 = c(2.5, 2.5), y1 = c(2.5, 2.375))
+text(c(4.5, 5.25), c(2.675, 2.4375), c('1', expression(italic(beta[3]))))
+legend('top', lty = c(2, 1), lwd = c(2, 1), horiz = TRUE, bty = 'n',
+       legend = c(expression(italic(T[i]==1)), expression(italic(T[i]==0))))
+@
+
+\end{enumerate}
+
+\item%c
+{\it Which of the models in part (b) is most appropriate for the main goal of
+the study? Explain.}
+
+Model iv.~is the most appropriate model for their goal. There should not be a
+difference between the groups at week zero because the treatment was not yet
+applied. Any difference between progabide and the placebo would appear as a
+difference in the trend over time, so we should allow the groups to have
+different slopes, but the varying intercept is not necessary.
+
+\item%d
+{\it Suppose you fit a linear model to these data using ordinary least
+squares. What is the primary reason why inference on the linear model
+coefficients would be invalid? Explain.}
+
+The only possible values of the response variable are multiples of 0.125 (for
+week 0) or 0.5 (for the other weeks), so it is not appropriate to use the
+normal distribution for inference.
+
+\item%e
+{\it In mean model v.~in part (b), if we treated week as a categorical
+variable, how many additional coefficients would we add?}
+
+We would need 6 additional coefficients: 3 more week main effects coefficients
+and 3 more week by treatment interaction coefficients.
+
+\end{enumerate}
+
+\end{enumerate}
+
+\end{document}
