@@ -1,0 +1,439 @@
+\documentclass[11pt]{article}
+\usepackage{fullpage,graphicx,float,amsmath,amsfonts,enumitem,fancyhdr}
+
+\setlist{parsep=5.5pt}
+\setlength{\parindent}{0pt}
+
+\newcommand\assignment{Stat 539 Homework 2}
+\newcommand\myname{Kenny Flagg}
+\newcommand\duedate{February 2, 2017}
+
+\pagestyle{fancy}
+\lhead{\assignment}
+\chead{\duedate}
+\rhead{\myname}
+\setlength{\headheight}{18pt}
+\setlength{\headsep}{2pt}
+
+\title{\assignment}
+\author{\myname}
+\date{\duedate}
+
+\begin{document}
+\maketitle
+
+<<setup, echo = FALSE, message = FALSE, cache = FALSE>>=
+library(knitr)
+library(extrafont)
+opts_chunk$set(echo = TRUE, comment = NA, message = FALSE,
+               show.signif.stars = FALSE,
+               fig.align = 'center', fig.width = 6.5, fig.height = 3,
+               fig.pos = 'H', size = 'footnotesize', dev = 'pdf',
+               dev.args = list(family = 'CM Roman', pointsize = 11))
+knit_theme$set('print')
+
+#library(xtable)
+options(xtable.floating = FALSE,
+        xtable.sanitize.rownames.function = function(x) x,
+        xtable.sanitize.colnames.function = function(x) x,
+        width = 80, scipen = 2, show.signif.stars = FALSE)
+@
+
+\begin{enumerate}
+
+\item%1
+{\it The overarching goal of this project is to explore whether there is any
+evidence suggestive of discrimination by sex in the employment of the faculty
+at a single university (University of Washington). To this end, salary data was
+obtained on all faculty members employed by the University during the 1995
+academic year. You have been asked to provide an analysis of 1995 salaries with
+the primary goal of determining whether or not gender discrimination exists
+with respect to pay. Along with the 1995 salary the following additional
+variables were also collected:}
+
+{\it ID = The anonymous identification number for the faculty member \\
+GENDER = Gender of the faculty member (coded as M or F) \\ DEG = The highest
+degree obtained by the faculty member (PhD, Professional, Other) \\
+FIELD = Field of research during 1995 (Arts, Professional, Other) \\
+STARTYR = Year starting employment at the university \\ YEAR = Year of data
+collection (1995 for all) \\ RANK = Faculty rank as of 1995 (Assistant,
+Associate, Full) \\ ADMIN = Does faculty member hold an administrative
+position as of 1995? (0=No, 1=Yes) \\ SALARY = 1995 salary in US dollars}
+
+{\it Realizing that the strongest generalization of analysis results comes when
+the statistical question is decided before looking at the data, in this
+exercise we will simply think about the goal of the analysis and ways in which
+we should statistically approach the problem.}
+
+\begin{enumerate}
+
+\item%a
+{\it First, consider the sampling scheme for the current project. What
+population will we be able to make inference about? Can you think of any way in
+which the sampling scheme could lead to misleading inference regarding gender
+discrimination at the university?}
+
+Data were collected on all faculty employed at one university during one year,
+so we an make inference only to the population of people who were University
+of Washington faculty during the 1995 academic year. Because we only have one
+year to work with, we do not observe people who left the university because
+they were discriminated against. Therefore, we may underestimate the level of
+discrimination at this university.
+
+\pagebreak
+\item%b
+{\it Recall that a confounder in the relationship between gender and salary
+must be causally related to salary and associated with gender. Thus we can
+begin looking for potential confounders by first considering those factors that
+may influence salary. List out those factors which you feel strongest influence
+salary in this setting and justify your choices (Note: You should not limit
+yourself to factors for which data has been collected).}
+
+\begin{itemize}
+\item \(RANK\) --- The largest pay differences would be due to differences in
+position within a department.
+\item Year of degree --- The amount of time a person has been working since
+they graduated would be related to their salary (probably more so than the
+amount of time at one institution).
+\item Tenure status --- This would be associated with year of degree and
+starting year, but people do not always get tenure at the same point in their
+careers so it would be an interesting variable on its own.
+\item \(DEG\) --- PhDs earn a bit more than others in academia.
+\item \(STARTYR\) --- More time at the current institution should come with
+raises, but I would not expect this variable to have a strong association with
+salary after accounting for time since degree and tenure status.
+\item \(FIELD\) --- There would be some salary differences based on the
+productivity of the department and demand for its graduates in the labor force.
+\end{itemize}
+
+\item%c
+{\it Among those factors listed above, decide which might reasonably be
+associated with gender and justify your choices. These are the potential
+confounders you would ideally like to adjust for in your analysis.}
+
+\(DEG\) would be associated with gender because many disciplines have histories
+of gender imbalance. If gender discrimination was present, \(RANK\) and tenure
+status would be associated with gender, as would \(STARTYR\) because people who
+are harmed by discrimination might not stay at the university as long as those
+who benefit from it.
+
+\item%d
+{\it List any factors that you a priori feel would be effect modifiers in the relationship between gender and salary. Justify your choice(s).}
+
+\(FIELD\) would be an effect modifier because different fields have different
+attitudes about diversity and gender equity. \(RANK\) and \(DEG\) could be
+effect modifiers because the positions and degrees with more prestige (and
+higher base salaries) would have more room for gender differences.
+
+\item%e
+{\it List any factors that you a priori feel would be precision variables you
+would ideally like to adjust for in your analysis. Justify your choice(s).}
+
+Years since degree would be a precision variable because would be a good
+predictor of salary regardless of whatever other associations may be present.
+If \(RANK\), \(DEG\), and tenure status are not confounders or effect modifiers
+then they would be precision variables because they are associated with
+scheduled pay increases.
+
+\pagebreak
+\item%f
+{\it Using your answers to (b) through (e), describe what available adjustment
+variables you would include in your regression analysis to answer the question
+of interest. Classify your adjustment variables as potential confounders,
+effect modifiers, or precision variables.}
+
+I do not think any of the variables I discussed in my previous answers are
+nuisance variables, so I would include all the available ones as follows:
+\begin{itemize}
+\item \(RANK\) --- potential confounder
+\item \(DEG\) --- potential confounder
+\item \(STARTYR\) --- potential confounder
+\item \(FIELD\) -- effect modifier
+\end{itemize}
+
+\end{enumerate}
+
+\item%2
+{\it The gamma distribution has probability density function}
+\begin{equation*}
+f(y|\alpha,\beta) = \frac{\beta^{\alpha}}{\Gamma(\alpha)}
+y^{\alpha-1}\exp(-\beta y),
+\end{equation*}
+{\it for \(y > 0\) where \(\Gamma(\alpha)\) is the Gamma function. Show that
+the gamma distribution is a member of the exponential dispersion family by
+putting its pdf into the form given in equation (4.1) on p.~121 of our
+textbook. Identify the natural parameter, the dispersion parameter, and the
+functions \(a(\cdot)\), \(b(\cdot)\), and \(c(\cdot)\).}
+
+The pdf can be written as
+\vspace{-0.5em}\begin{align*}
+f(y|\alpha,\beta) &= \frac{\beta^{\alpha}}{\Gamma(\alpha)}
+y^{\alpha-1}\exp(-\beta y) \\
+&= \exp\left(\alpha\log(\beta) - \log(\Gamma(\alpha))
++ (\alpha-1)\log(y) - \beta y\right) \\
+&= \exp\left(\alpha\log\left(\alpha\frac{\beta}{\alpha}\right)
+- \log(\Gamma(\alpha)) + (\alpha-1)\log(y)
+- \alpha \frac{\beta}{\alpha} y\right) \\
+&= \exp\left(\frac{y\frac{\beta}{\alpha}
+- \log\left(\frac{\beta}{\alpha}\right)}{-\frac{1}{\alpha}}
++ \alpha\log\left(\alpha\right) - \log\left(\Gamma(\alpha)\right)
++ (\alpha - 1)\log(y)\right) \\
+&= \exp\left(\frac{y\theta - \log(\theta)}{-\frac{1}{\phi}}
++ \phi\log(\phi) - \log(\Gamma(\phi)) + (\phi - 1)\log(y)\right)
+\end{align*}
+\vspace{-0.5em}where
+\begin{itemize}
+\item\(\theta = \dfrac{\beta}{\alpha}\) is the natural parameter,
+\item\(\phi = \alpha\) is the dispersion parameter,
+\item\(a(\phi) = -\dfrac{1}{\phi}\),
+\item\(b(\theta) = \log(\theta)\), and
+\item\(c(y,\phi) = \phi\log(\phi) - \log(\Gamma(\phi)) + (\phi - 1)\log(y)\)
+\end{itemize}
+\vspace{-0.5em}so the gamma distribution is a member of the exponential
+dispersion family.
+
+\item%3
+{\it Suppose we are analyzing data regarding the effect of smoking and/or sex
+on systolic blood pressure (SBP). Suppose that the variance of SBP is
+\(\sigma^{2}\) within each category defined by sex and smoking habits, and
+further suppose that the true average SBP within each group is as follows:}
+\begin{center}\begin{tabular}{l|cc}
+& Males & Females \\
+\hline
+Nonsmokers & 125 & 120 \\
+Smokers & 133 & 128
+\end{tabular}\end{center}
+{\it Suppose that the percentage of smokers among both males and females is
+30\%. Let \(MALE\) be an indicator variable that is 1 for males and 0 for
+females and \(SMOKE\) be an indicator variable that is 1 for smokers and 0 for
+nonsmokers.}
+
+\begin{enumerate}
+
+\item%a
+{\it Is \(MALE\) an effect modifier for the relationship between \(SMOKE\) and
+\(SBP\)? Justify your answer.}
+
+\textbf{No}, \(MALE\) is not an effect modifier because, for both sexes, the
+true mean \(SBP\) for smokers is 8 units higher than the true mean \(SBP\) for
+nonsmokers.
+
+\item%b
+{\it Is \(MALE\) a confounding variable for the relationship between \(SMOKE\)
+and \(SBP\)? Justify your answer.}
+
+\textbf{No}, \(MALE\) is not a confounder because it is not related to both
+\(SBP\) and smoking status. It is related to the response \(SBP\) because the
+true mean \(SBP\) varies by sex within each smoking status, but it is not
+related to smoking status because the proportion who smoke is the same for both
+sexes. (\(MALE\) is a precision variable.)
+
+\item%c
+{\it Suppose we fit the model}
+\begin{equation*}
+E(SBP) = \beta_{0} + \beta_{1} \times SMOKE + \beta_{2} \times MALE
++ \beta_{3} \times SMOKE \times MALE
+\end{equation*}
+{\it What are the interpretations of the linear regression estimates
+\(\hat{\beta}_{0}\), \(\hat{\beta}_{1}\), \(\hat{\beta}_{2}\), and
+\(\hat{\beta}_{3}\)? What are the expected values of the linear regression
+estimates \(\hat{\beta}_{0}\), \(\hat{\beta}_{1}\), \(\hat{\beta}_{2}\), and
+\(\hat{\beta}_{3}\)?}
+
+\begin{itemize}
+\item We estimate that the mean \(SBP\) for female nonsmokers is
+\(\hat{\beta}_{0}\).
+\begin{equation*}E\left(\hat{\beta}_{0}\right)=\beta_{0} = 120\end{equation*}
+\item We estimate that the mean \(SBP\) for female smokers is
+\(\hat{\beta}_{1}\) higher than the mean \(SBP\) for female nonsmokers.
+\begin{equation*}E\left(\hat{\beta}_{1}\right) = \beta_{1} = 8\end{equation*}
+\item We estimate that the mean \(SBP\) for male nonsmokers is
+\(\hat{\beta}_{2}\) higher than the mean \(SBP\) for female nonsmokers.
+\begin{equation*}E\left(\hat{\beta}_{2}\right) = \beta_{2} = 5\end{equation*}
+\item We estimate that the difference in mean \(SBP\) between male smokers and
+male nonsmokers is \(\hat{\beta}_{3}\) higher than the difference in mean
+\(SBP\) between female smokers and female nonsmokers.
+\begin{equation*}E\left(\hat{\beta}_{3}\right) = \beta_{3} = 0\end{equation*}
+\end{itemize}
+
+\item%d
+{\it Suppose we fit the model}
+\begin{equation*}
+E(SBP) = \beta_{0} + \beta_{1} \times SMOKE + \beta_{2} \times MALE
+\end{equation*}
+{\it What are the interpretations of the linear regression estimates
+\(\hat{\beta}_{0}\), \(\hat{\beta}_{1}\), and \(\hat{\beta}_{2}\)? What are the
+expected values of the linear regression estimates \(\hat{\beta}_{0}\),
+\(\hat{\beta}_{1}\), and \(\hat{\beta}_{2}\)?}
+
+\begin{itemize}
+\item We estimate that the mean \(SBP\) for female nonsmokers is
+\(\hat{\beta}_{0}\).
+\begin{equation*}E\left(\hat{\beta}_{0}\right)=\beta_{0} = 120\end{equation*}
+\item We estimate that the mean \(SBP\) for smokers of a given sex is
+\(\hat{\beta}_{1}\) higher than the mean \(SBP\) for nonsmokers of the same
+sex.
+\begin{equation*}E\left(\hat{\beta}_{1}\right) = \beta_{1} = 8\end{equation*}
+\item We estimate that the mean \(SBP\) for males of a given smoking status is
+\(\hat{\beta}_{2}\) higher than the mean \(SBP\) for females of the same
+smoking status.
+\begin{equation*}E\left(\hat{\beta}_{2}\right) = \beta_{2} = 5\end{equation*}
+\end{itemize}
+
+\item%e
+{\it Suppose we fit the model}
+\begin{equation*}
+E(SBP) = \beta_{0} + \beta_{1} \times SMOKE
+\end{equation*}
+{\it What are the interpretations of the linear regression estimates
+\(\hat{\beta}_{0}\) and \(\hat{\beta}_{1}\)? What are the expected values of
+the linear regression estimates \(\hat{\beta}_{0}\) and \(\hat{\beta}_{1}\)?}
+
+\begin{itemize}
+\item We estimate that the mean \(SBP\) for nonsmokers is \(\hat{\beta}_{0}\).
+\begin{equation*}E\left(\hat{\beta}_{0}\right)=\beta_{0} = 120\end{equation*}
+\item We estimate that the mean \(SBP\) for smokers is \(\hat{\beta}_{1}\)
+higher than the mean \(SBP\) for nonsmokers.
+\begin{equation*}E\left(\hat{\beta}_{1}\right) = \beta_{1} = 8\end{equation*}
+\end{itemize}
+
+\end{enumerate}
+
+\pagebreak
+\item%4
+{\it Agresti Exercise 2.42 (p.~77) In some applications, such as regressing
+annual income on the number of years of education, the variance of \(y\) tends
+to be larger at higher values of \(x\). Consider the model
+\(E(y_{i}) = \beta x_{i}\), assuming \(var(y_{i}) = x_{i} \sigma^{2}\) for
+unknown \(\sigma^{2}\).}
+
+\begin{enumerate}
+
+\item%a
+{\it Show that the generalized least squares estimator minimizes
+\(\sum_{i}(y_{i} - \beta x_{i})^{2}/x_{i}\) (i.e., giving more weight to
+observations with smaller \(x_{i}\)) and has \(\hat{\beta}_{GLS} =
+\bar{y}/\bar{x}\), with \(var\left(\hat{\beta}_{GLS}\right) =
+\sigma^{2} / \left(\sum_{i}x_{i}\right)\).}
+
+The model matrix is \(\mathbf{X} = \begin{bmatrix}x_{1} & \cdots & x_{n}
+\end{bmatrix}^{T}\). Assuming the \(y_{i}\) are independent, we have
+\begin{equation*}
+var(\mathbf{y}) = \sigma^{2}\mathbf{V} = \sigma^{2}\begin{bmatrix}
+x_{1} & & 0 \\
+& \ddots & \\
+0 & & x_{n}
+\end{bmatrix}
+\end{equation*}
+so the GLS estimator needs to minimize
+\begin{align*}
+\left(\mathbf{y}-\mathbf{X}\beta\right)^{T}\mathbf{V}^{-1}
+\left(\mathbf{y}-\mathbf{X}\beta\right)
+&= \begin{bmatrix}y_{1}-\beta x_{1} & \cdots & y_{n}-\beta x_{n}\end{bmatrix}
+\begin{bmatrix}
+\frac{1}{x_{1}} & & 0 \\
+& \ddots & \\
+0 & & \frac{1}{x_{n}}
+\end{bmatrix}
+\begin{bmatrix}y_{1}-\beta x_{1} \\ \vdots \\ y_{n}-\beta x_{n}\end{bmatrix} \\
+&= \begin{bmatrix}
+\frac{y_{1}-\beta x_{1}}{x_{1}} & \cdots & \frac{y_{n}-\beta x_{n}}{x_{n}}
+\end{bmatrix}
+\begin{bmatrix}y_{1}-\beta x_{1} \\ \vdots \\ y_{n}-\beta x_{n}\end{bmatrix} \\
+&= \sum_{i=1}^{n}\frac{\left(y-\beta x_{i}\right)^{2}}{x_{i}}.
+\end{align*}
+The GLS estimator is
+\begin{align*}
+\hat{\beta}_{GLS} &= \left(\mathbf{X}^{T}\mathbf{V}^{-1}\mathbf{X}\right)^{-1}
+\mathbf{X}^{T}\mathbf{V}^{-1}\mathbf{y} \\
+&= \left(\begin{bmatrix}x_{1} & \cdots & x_{n}\end{bmatrix}\begin{bmatrix}
+\frac{1}{x_{1}} & & 0 \\
+& \ddots & \\
+0 & & \frac{1}{x_{n}}
+\end{bmatrix}\begin{bmatrix}x_{1} \\ \vdots \\ x_{n}\end{bmatrix}\right)^{-1}
+\mathbf{X}^{T}\mathbf{V}^{-1}\mathbf{y} \\
+&= \left(\begin{bmatrix}1 & \cdots & 1\end{bmatrix}
+\begin{bmatrix}x_{1} \\ \vdots \\ x_{n}\end{bmatrix}\right)^{-1}
+\mathbf{X}^{T}\mathbf{V}^{-1}\mathbf{y} \\
+&= \frac{1}{\sum_{i=1}^{n}x_{i}}\mathbf{X}^{T}\mathbf{V}^{-1}\mathbf{y} \\
+&= \frac{1}{\sum_{i=1}^{n}x_{i}}
+\begin{bmatrix}x_{1} & \cdots & x_{n}\end{bmatrix}\begin{bmatrix}
+\frac{1}{x_{1}} & & 0 \\
+& \ddots & \\
+0 & & \frac{1}{x_{n}}
+\end{bmatrix}\begin{bmatrix}y_{1} \\ \vdots \\ y_{n}\end{bmatrix} \\
+&= \frac{1}{\sum_{i=1}^{n}x_{i}}
+\begin{bmatrix}1 & \cdots & 1\end{bmatrix}
+\begin{bmatrix}y_{1} \\ \vdots \\ y_{n}\end{bmatrix} \\
+&= \frac{\sum_{i=1}^{n}y_{i}}{\sum_{i=1}^{n}x_{i}} \\
+&= \frac{\bar{y}}{\bar{x}}
+\end{align*}
+with variance
+\begin{align*}
+var\left(\hat{\beta}_{GLS}\right) &= var\left(\frac{\bar{y}}{\bar{x}}\right) \\
+&= var\left(\frac{\sum_{i=1}^{n}y_{i}}{\sum_{i=1}^{n}x_{i}}\right) \\
+&= \frac{\sum_{i=1}^{n}var(y_{i})}{\left(\sum_{i=1}^{n}x_{i}\right)^{2}} \\
+&= \frac{\sum_{i=1}^{n}x_{i}\sigma^{2}}
+{\left(\sum_{i=1}^{n}x_{i}\right)^{2}} \\
+&= \frac{\sigma^{2}}{\sum_{i=1}^{n}x_{i}}.
+\end{align*}
+
+\pagebreak
+\item%b
+{\it Show that the ordinary least squares estimator is \(\hat{\beta} =
+\left(\sum_{i}x_{i}y_{i}\right)/\left(\sum_{i}x_{i}^{2}\right)\) and has
+\(var\left(\hat{\beta}\right) = \sigma^{2}\left(\sum_{i}x_{i}^{3}/
+\left(\sum_{i}x_{i}^{2}\right)^{2}\right)\).}
+
+The OLS estimator is
+\begin{align*}
+\hat{\beta} &= \left(\mathbf{X}^{T}\mathbf{X}\right)^{-1}
+\mathbf{X}^{T}\mathbf{y} \\
+&= \left(\begin{bmatrix}x_{1} & \cdots & x_{n}\end{bmatrix}
+\begin{bmatrix}x_{1} \\ \vdots \\ x_{n}\end{bmatrix}\right)^{-1}
+\mathbf{X}^{T}\mathbf{y} \\
+&= \frac{1}{\sum_{x_{2}^{2}}}\mathbf{X}^{T}\mathbf{y} \\
+&= \frac{1}{\sum_{x_{2}^{2}}}\begin{pmatrix}
+x_{1} & \cdots & x_{n}
+\end{pmatrix}\begin{bmatrix}
+y_{1} \\ \vdots \\ y_{n}
+\end{bmatrix} \\
+&= \frac{\sum_{i=1}^{n}x_{i}y_{i}}{\sum_{i=1}^{n}x_{i}^{2}}
+\end{align*}
+with variance
+\begin{align*}
+var\left(\hat{\beta}\right)
+&= var\left(\frac{\sum_{i=1}^{n}x_{i}y_{i}}{\sum_{i=1}^{n}x_{i}^{2}}\right) \\
+&= \frac{\sum_{i=1}^{n}x_{i}^{2}var(y_{i})}
+{\left(\sum_{i=1}^{n}x_{i}^{2}\right)}^{2} \\
+&= \frac{\sum_{i=1}^{n}x_{i}^{2}x_{i}\sigma^{2}}
+{\left(\sum_{i=1}^{n}x_{i}^{2}\right)^{2}} \\
+&= \sigma^{2}\frac{\sum_{i=1}^{n}x_{i}^{3}}
+{\left(\sum_{i=1}^{n}x_{i}^{2}\right)^{2}}.
+\end{align*}
+
+\item%c
+{\it Show that \(var\left(\hat{\beta}\right) \geq
+var\left(\hat{\beta}_{GLS}\right)\).}
+
+Note that
+\begin{align*}
+var\left(\hat{\beta}\right)
+&= \frac{\sum_{i=1}^{n}x_{i}^{3}\sum_{i=1}^{n}x_{i}}
+{\left(\sum_{i=1}^{n}x_{i}^{2}\right)^{2}}var\left(\hat{\beta}_{GLS}\right) \\
+&= \frac{\sum_{i=1}^{n}\sum_{j=1}^{n}x_{i}^{3}x_{j}}
+{\sum_{i=1}^{n}\sum_{j=1}^{n}x_{i}^{2}x_{j}^{2}}
+\left(\hat{\beta}_{GLS}\right).
+\end{align*}
+Since \(var(y_{i})=x_{i}\sigma^{2}\) implies \(x_{i}>0\) for all \(i\),
+\begin{equation*}
+\frac{\sum_{i=1}^{n}\sum_{j=1}^{n}x_{i}^{3}x_{j}}
+{\sum_{i=1}^{n}\sum_{j=1}^{n}x_{i}^{2}x_{j}^{2}} \geq 1
+\end{equation*}
+so \(var\left(\hat{\beta}\right) \geq var\left(\hat{\beta}_{GLS}\right)\).
+
+\end{enumerate}
+
+\end{enumerate}
+
+\end{document}
