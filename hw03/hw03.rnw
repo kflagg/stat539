@@ -1,0 +1,592 @@
+\documentclass[11pt]{article}
+\usepackage{fullpage,graphicx,float,amsmath,amsfonts,enumitem,fancyhdr,hyperref}
+
+\setlist{parsep=5.5pt}
+\setlength{\parindent}{0pt}
+
+\newcommand\assignment{Stat 539 Homework 3}
+\newcommand\myname{Kenny Flagg}
+\newcommand\duedate{February 14, 2017}
+
+\pagestyle{fancy}
+\lhead{\assignment}
+\chead{\duedate}
+\rhead{\myname}
+\setlength{\headheight}{18pt}
+\setlength{\headsep}{2pt}
+
+\title{\assignment}
+\author{\myname}
+\date{\duedate}
+
+\begin{document}
+\maketitle
+
+<<setup, echo = FALSE, message = FALSE, cache = FALSE>>=
+library(knitr)
+library(extrafont)
+opts_chunk$set(echo = FALSE, comment = '#', message = FALSE,
+               show.signif.stars = FALSE,
+               fig.align = 'center', fig.width = 6.5, fig.height = 3,
+               fig.pos = 'H', size = 'footnotesize', dev = 'pdf',
+               dev.args = list(family = 'CM Roman', pointsize = 11))
+knit_theme$set('print')
+
+library(xtable)
+options(xtable.floating = FALSE,
+        xtable.sanitize.rownames.function = function(x) x,
+        xtable.sanitize.colnames.function = function(x) x,
+        width = 80, scipen = 2, show.signif.stars = FALSE)
+@
+
+\begin{enumerate}
+
+\item%1
+{\it Recall from equation (4.15) on p. 133 that the deviance of a model \(M\)
+is equal to:}
+\begin{equation*}
+D(\mathbf{y};\boldsymbol{\hat{\mu}}) = 2\sum_{i=1}^{n}w_{i}
+\left[y_{i}\left(\tilde{\theta}_{i} - \hat{\theta}_{i}\right)
+- b\left(\tilde{\theta}_{i}\right)
++ b\left(\hat{\theta}_{i}\right)\right].
+\end{equation*}
+{\it Let \(\hat{\mu}_{i}\) be the fitted values for model \(M\). Use this
+expression of the deviance to show that}
+
+\begin{enumerate}
+\item%a
+{\it the deviance for a Normal GLM with identity link is equal to:}
+\begin{equation*}
+\sum_{i=1}^{n}\left(y_{i}-\hat{\mu}_{i}\right)^{2}.
+\end{equation*}
+The Normal distribution has \(\theta_{i}=\mu_{i}\),
+\(b(\theta_{i})=\dfrac{\theta_{i}^{2}}{2}=\dfrac{\mu_{i}^{2}}{2}\), and
+canonical link \(g(\mu_{i})=\mu_{i}\). Also,
+\(a(\phi)=\dfrac{\phi}{w_{i}}=\sigma^{2}\) so
+\(\phi = \sigma^{2}\) and \(w_{i}=1\). In the saturated model,
+\(\tilde{\theta}_{i} = y_{i}\), so
+\begin{align*}
+D\left(\mathbf{y};\hat{\boldsymbol{\mu}}\right)
+&= 2 \sum_{i=1}^{n} (1) \left[y_{i}\left(y_{i} - \hat{\mu}_{i}\right)
+- b(y_{i}) + b\left(\hat{\mu}_{i}\right)\right] \\
+&= 2 \sum_{i=1}^{n} \left[y_{i}^{2} - y_{i}\hat{\mu}_{i}
+- \frac{y_{i}^{2}}{2} + \frac{\hat{\mu}_{i}^{2}}{2}\right] \\
+&= \sum_{i=1}^{n} \left(y_{i}^{2} - 2y_{i}\hat{\mu}_{i}
++ \hat{\mu}_{i}^{2}\right) \\
+&= \sum_{i=1}^{n} \left(y_{i} - \hat{\mu}_{i}\right)^{2}.
+\end{align*}
+
+\pagebreak
+\item%b
+{\it the deviance for a Poisson GLM with log link is equal to:}
+\begin{equation*}
+2\sum_{i=1}^{n}\left(y_{i}\log\left(\frac{y_{i}}{\hat{\mu}_{i}}\right)
+- \left(y_{i} - \hat{\mu}_{i}\right)\right).
+\end{equation*}
+The Poisson distribution has \(\theta_{i}=\log(\mu_{i})\),
+\(b(\theta_{i})=\exp(\theta_{i})=\mu_{i}\), and canonical link
+\(g(\mu_{i})=\log(\mu_{i})\). And \(a(\phi)=\dfrac{\phi}{w_{i}}=1\) so
+\(\phi = 1\) and \(w_{i}=1\). In the saturated model,
+\(\tilde{\theta}_{i} = \log(y_{i})\), so
+\begin{align*}
+D\left(\mathbf{y};\hat{\boldsymbol{\mu}}\right)
+&= 2 \sum_{i=1}^{n}(1)\left[y_{i}\left(\log(y_{i}) - \log(\hat{\mu}_{i})\right)
+- b(y_{i}) + b\left(\hat{\mu}_{i}\right)\right] \\
+&= 2 \sum_{i=1}^{n}\left[y_{i}\log\left(\frac{y_{i}}{\hat{\mu_{i}}}\right)
+- y_{i} + \hat{\mu}_{i}\right] \\
+&= 2 \sum_{i=1}^{n}\left[y_{i}\log\left(\frac{y_{i}}{\hat{\mu_{i}}}\right)
+- \left(y_{i} - \hat{\mu}_{i}\right)\right].
+\end{align*}
+
+\end{enumerate}
+
+\item%2
+{\it Consider the simple case where \(nY \sim Bin(n, \pi)\) and we would like
+to test the null hypothesis \(H_{0}:\pi=\pi_{0}\) versus
+\(H_{a}:\pi\neq\pi_{0}\).}
+
+\begin{enumerate}
+
+\item%a
+{\it Show that the chi-squared forms of the test statistics are:}
+
+\begin{center}
+
+Likelihood-ratio: \(\displaystyle -2(\ell_{0}-\ell_{1})
+= -2 \log\left[\frac{\pi_{0}^{ny}(1-\pi_{0})^{n(1-y)}}
+{y^{ny}(1-y)^{n(1-y)}}\right]\).
+
+Wald: \(\displaystyle z^{2}=\frac{(y-\pi_{0})^{2}}{[y(1-y)/n]}\)
+
+Score: \(\displaystyle z^{2}=\frac{(y-\pi_{0})^{2}}{[\pi_{0}(1-\pi_{0})/n]}\)
+
+\end{center}
+
+\textbf{Likelihood-ratio:} The log-likelihood is
+\begin{equation*}
+\ell(\pi;y) = \log\left(\begin{pmatrix}n \\ ny\end{pmatrix}
+\pi^{ny}(1-\pi)^{n(1-y)}\right)
+= \log\begin{pmatrix}n \\ ny\end{pmatrix}
++ \log\left(\pi^{ny}(1-\pi)^{n(1-y)}\right).
+\end{equation*}
+The MLE under \(H_{a}\) is \(\hat{\pi}=y\) so the LRT statistic is
+\begin{align*}
+-2\left(\ell_{0}-\ell_{1}\right)
+&= -2\left(\ell(\pi_{0};y) - \ell(y;y)\right) \\
+&= -2\left(\log\begin{pmatrix}n \\ ny\end{pmatrix}
++ \log\left(\pi_{0}^{ny}(1-\pi_{0})^{n(1-y)}\right)\right. \\
+&\qquad\qquad - \left.\log\begin{pmatrix}n \\ ny\end{pmatrix}
+- \log\left(y^{ny}(1-y)^{n(1-y)}\right)\right) \\
+&= -2\log\left(\frac{\pi_{0}^{ny}(1-\pi_{0})^{n(1-y)}}
+{y^{ny}(1-y)^{n(1-y)}}\right).
+\end{align*}
+
+\textbf{Wald:} The variance function is \(var(Y) = v(\pi)
+= \dfrac{\pi(1-\pi)}{n}\), which is also the variance of \(\hat{\pi} = y\).
+Then the estimated variance of \(\hat{\pi}\) is \(\widehat{var}(\hat{\pi})
+= \dfrac{y(1-y)}{n}\) so the Wald statistic is
+\begin{equation*}
+z^{2} = \frac{(\hat{\pi} - \pi_{0})^2}{\widehat{var}(\hat{\pi})}
+= \frac{(y - \pi_{0})^{2}}{y(1-y)/n}.
+\end{equation*}
+
+\textbf{Score:} The variance of \(\hat{\pi} = y\) under \(H_{0}\) is
+\(var(\hat{\pi}) = \frac{\pi_{0}(1-\pi_{0})}{n}\) so the score statistic is
+\begin{equation*}
+z^{2} = \frac{(\hat{\pi} - \pi_{0})^2}{var(\hat{\pi})}
+= \frac{(y - \pi_{0})^{2}}{\pi_{0}(1-\pi_{0})/n}.
+\end{equation*}
+
+\item%b
+{\it A recent study examined expressions of commitment between two partners in
+a committed romantic relationship. One aspect of the study involved 47
+heterosexual couples who are part of an online pool of people willing to
+participate in  surveys. These 47 couples were asked about which person was
+the first to say ``I love you.'' In 26 of the 47 couples, the male said ``I
+love you'' first. Set up a hypothesis test to test the null hypothesis that
+males and females in a committed romantic relationship are equally likely to
+say ``I love you'' first, defining the parameter of interest in context.
+Calculate the likelihood-ratio test statistic, the Wald test statistic, and
+the score test statistic, and the corresponding p-value for each. Do the three
+tests yield different conclusions? Write a conclusion of the study in context
+of the problem (using the LRT p-value).}
+
+The parameter of interest is \(\pi\), the proportion of committed heterosexual
+couples where the male said ``I love you'' first. We are testing
+\begin{itemize}
+\item \(H_{0}\): \(\pi = \frac{1}{2}\), the male and female are equally
+likely to say ``I love you'' first;
+\item \(H_{a}\): \(\pi \neq \frac{1}{2}\), the male and female are not
+equally likely to say ``I love you'' first.
+\end{itemize}
+In \(n = 47\) couples, we observed \(y = \frac{26}{47}\).
+
+\textbf{Likelihood-ratio:} Under \(H_{0}\), the LRT statistic follows a
+\(\chi^{2}_{1}\) distribution. The observed value of the statistic is
+\begin{equation*}
+-2\log\left[\frac{\left(\frac{1}{2}\right)^{26}\left(\frac{1}{2}\right)^{21}}
+{\left(\frac{26}{47}\right)^{26}\left(\frac{21}{47}\right)^{21}}\right]
+\approx \Sexpr{signif(2 * (dbinom(26, 47, 26/47, log = TRUE) -
+                        dbinom(26, 47, 1/2, log = TRUE)), 3)}
+\end{equation*}
+with a p-value of
+\Sexpr{round(pchisq(2 * (dbinom(26, 47, 26/47, log = TRUE) -
+                      dbinom(26, 47, 1/2, log = TRUE)),
+                    1, lower.tail = FALSE), 4)}.
+
+\textbf{Wald:} Under \(H_{0}\), the Wald statistic follows a
+\(\chi^{2}_{1}\) distribution. The observed value of the statistic is
+\begin{equation*}
+\frac{\left(\frac{26}{47}-\frac{1}{2}\right)^{2}}
+{\left(\frac{26}{47}\right)\left(\frac{21}{47}\right)/47}
+\approx \Sexpr{signif(((26/47 - 1/2)^2) /
+                       (26/47 * 21/47 /47), 3)}
+\end{equation*}
+with a p-value of
+\Sexpr{round(pchisq(((26/47 - 1/2)^2) / (26/47 * 21/47 /47),
+                    1, lower.tail = FALSE), 4)}.
+
+\textbf{Score:} Under \(H_{0}\), the Score statistic follows a
+\(\chi^{2}_{1}\) distribution. The observed value of the statistic is
+\begin{equation*}
+\frac{\left(\frac{26}{47}-\frac{1}{2}\right)^{2}}
+{\left(\frac{1}{2}\right)\left(\frac{1}{2}\right)/47}
+\approx \Sexpr{signif(((26/47 - 1/2)^2) /
+                       (1/2 * 1/2 /47), 3)}
+\end{equation*}
+with a p-value of
+\Sexpr{round(pchisq(((26/47 - 1/2)^2) / (1/2 * 1/2 /47),
+                    1, lower.tail = FALSE), 4)}.
+
+In this case, all three tests yield similar test statistics and p-values.
+There is no evidence (\(\chi^{2}_{1} =
+\Sexpr{signif(2 * (dbinom(26, 47, 26/47, log = TRUE) -
+                dbinom(26, 47, 1/2, log = TRUE)), 3)}\), p-value
+= \Sexpr{round(pchisq(2 * (dbinom(26, 47, 26/47, log = TRUE) -
+                        dbinom(26, 47, 1/2, log = TRUE)),
+                      1, lower.tail = FALSE), 4)}) that the true proportion
+of committed heterosexual couples in this pool of survey-takers where the male
+said ``I love you'' first is different from \(\frac{1}{2}\).
+
+\end{enumerate}
+
+\item%3
+{\it Agresti Exercise 4.16 (p. 161) Find the form of the deviance residual for
+an observation in:}
+
+\begin{enumerate}
+
+\item%a
+{\it a Binomial GLM}
+
+For the Binomial GLM with logit link, \(\theta_{i}
+= \log\left(\frac{\pi_{i}}{1-\pi_{i}}\right)\), \(b(\theta_{i})
+= \log\left(1+\exp(\theta_{i})\right)
+= \log\left(\frac{1}{1-\pi_{i}}\right)\), and \(a(\phi)
+= \frac{1}{n_{i}}\) so \(w_{i} = n_{i}\). In the saturated model,
+\(\tilde{\theta} = \log\left(\frac{y_{i}}{1-y_{i}}\right)\). Then
+\begin{align*}
+d_{i} &= 2 n_{i} \left[y_{i}
+\left(\log\left(\frac{y_{i}}{1-y_{i}}\right)
+- \log\left(\frac{\hat{\pi}_{i}}{1-\hat{\pi}_{i}}\right)\right)
+- \log\left(\frac{1}{1-y_{i}}\right)
++ \log\left(\frac{1}{1-\hat{\pi}_{i}}\right)\right] \\
+&= 2 n_{i} \left[y_{i} \log\left(\frac{y_{i}/(1-y_{i})}
+{\hat{\pi}_{i}/(1-\hat{\pi}_{i})}\right)
++ \log\left(\frac{1-y_{i}}{1-\hat{\pi}_{i}}\right)\right] \\
+&= 2 \log\left(\frac{y_{i}^{n_{i}y_{i}}(1-y_{i})^{n_{i}(1-y_{i})}}
+{\hat{\pi}_{i}^{n_{i}y_{i}}(1-\hat{\pi})^{n_{i}(1-y_{i})}}\right)
+\end{align*}
+so the deviance residuals are
+\begin{equation*}
+\sqrt{2 \log\left(\frac{y_{i}^{n_{i}y_{i}}(1-y_{i})^{n_{i}(1-y_{i})}}
+{\hat{\pi}_{i}^{n_{i}y_{i}}(1-\hat{\pi})^{n_{i}(1-y_{i})}}\right)}
+\times \mathrm{sign}\left(y_{i} - \hat{\pi}_{i}\right).
+\end{equation*}
+
+\item%b
+{\it a Poisson GLM}
+
+For the Poisson GLM, from 1(b), \(d_{i}
+= 2\left[y_{i}\log\left(\frac{y_{i}}{\hat{\mu_{i}}}\right)
+- \left(y_{i} - \hat{\mu}_{i}\right)\right]\) so the deviance residuals are
+\begin{equation*}
+\sqrt{2\left[y_{i}\log\left(\frac{y_{i}}{\hat{\mu_{i}}}\right)
+- \left(y_{i} - \hat{\mu}_{i}\right)\right]}
+\times \mathrm{sign}\left(y_{i} - \hat{\mu}_{i}\right).
+\end{equation*}
+
+\end{enumerate}
+
+\pagebreak
+\item%4
+{\it Consider again the Framingham heart study discussed in Lecture 7. A
+description of the data set can be found here:
+\url{http://www.ics.uci.edu/~staceyah/111-202/data/framingham.html}.
+Read the data into R using the following command:}
+<<prob4_1, echo = TRUE, eval = FALSE>>=
+fram <- read.table('http://www.math.montana.edu/shancock/courses/stat539/data/Framingham.txt',
+                   header = TRUE)
+@
+
+\begin{enumerate}
+
+\item%a
+{\it Write an R function to run the iterated weighted least squares algorithm
+for a generalized linear model that uses the logit link. (You may just modify
+the IWLS R code from class.) Use this function to calculate the maximum
+likelihood estimates of the coefficients for a logistic regression model with
+response \texttt{chdfate} and predictors \texttt{sex} and \text{age}. (Be sure
+to first re-code sex as a factor.) Turn in a well-commented .R script file with
+your IWLS R function and the R commands used to run the IWLS algorithm on the
+Framingham data to the ``Homework 3 R Code'' Assignment submission folder in
+D2L.}
+
+<<prob4a1>>=
+source('flagg_iwls.r') # Stores estimates in beta_hat.
+@
+
+The table below shows the estimated coefficients that my IWLS function finds
+in \Sexpr{attr(beta_hat, 'iterations')} iterations using initial values of
+\(\beta^{(0)}_{0}=\beta^{(0)}_{1}=\beta^{(0)}_{2}=0\) and a convergence
+criterion of \(\left|\beta^{(t+1)}_{j}-\beta^{(t)}_{j}\right| < 0.00001\).
+\begin{center}
+<<prob4a2, results = 'asis'>>=
+xtable(beta_hat, align = '||cr||', digits = 6)
+@
+\end{center}
+
+\item%b
+{\it For each of the following questions,}
+\begin{itemize}
+\item {\it Create at least one well labeled, informative plot that helps
+illuminate the question of interest.}
+\item {\it Clearly state the reduced model and full model for a model
+comparison test that addresses the question.}
+\item {\it Use the \texttt{anova} function in R to carry out the appropriate
+likelihood ratio test. Write a conclusion of the test that addresses the
+question.}
+\item {\it Calculate and interpret an approximate 95\% confidence interval(s)
+that addresses the question.}
+\end{itemize}
+
+\begin{enumerate}
+
+\item%i
+{\it How do the odds of coronary heart disease differ between men and women,
+adjusting for age?}
+
+I first binned the ages with cutpoints at every 10th percentile so that the
+bins have similar sizes. The plot on the next page shows the observed odds of
+CHD for males and females in each age bin.
+
+<<prob4b1plot, message = FALSE>>=
+library(dplyr)
+library(ggplot2)
+theme_set(theme_bw())
+
+# Plot for 4(b)i.
+ggplot(fram %>%
+         mutate(
+           Age = cut(age, quantile(age, seq(0, 1, 0.1)), include.lowest = TRUE),
+           Sex = ifelse(sex == 1, 'Male', ifelse(sex == 2, 'Female', NA))
+         ) %>%
+         group_by(Age, Sex) %>%
+         summarise(`Odds of CHD` = mean(chdfate) / (1 - mean(chdfate))) %>%
+         ungroup,
+       aes(y = `Odds of CHD`, x = Age, col = Sex)) +
+  geom_point() +
+  scale_color_manual(values = c('black', 'grey')) +
+  ggtitle('Empirical Odds of CHD, by Binned Age')
+@
+
+The appropriate reduced model is
+\begin{align*}
+Y_{i} &\sim \mathrm{Binomial}(1, \mu_{i}); \\
+\mathrm{logit}(\mu_{i}) &= \beta_{0} + \beta_{1}\mathrm{age}_{i}
+\end{align*}
+and the full model is
+\begin{align*}
+Y_{i} &\sim \mathrm{Binomial}(1, \mu_{i}); \\
+\mathrm{logit}(\mu_{i}) &= \beta_{0} + \beta_{1}\mathrm{age}_{i}
++ \beta_{2}\mathrm{female}_{i}.
+\end{align*}
+
+<<prob4b1anova, echo = TRUE>>=
+prob_i_reduced <- glm(chdfate ~ age, data = fram, family = binomial)
+prob_i_full <- glm(chdfate ~ age + female, data = fram, family = binomial)
+anova(prob_i_reduced, prob_i_full, test = 'LRT')
+@
+<<prob4b1>>=
+prob_i_anova <- anova(prob_i_reduced, prob_i_full, test = 'LRT')
+prob_i_sum <- summary(prob_i_full)$coefficients
+@
+
+With an LRT statistic of \(\chi^{2}_{\Sexpr{prob_i_anova[2, 'Df']}}
+= \Sexpr{sprintf('%.2f', prob_i_anova[2, 'Deviance'])}\) and a p-value
+\(\Sexpr{format.pval(prob_i_anova[2, 'Pr(>Chi)'], digits = 4, eps = 0.0001)}\),
+there is very strong evidence that the odds of CHD differ between males and
+females after accounting for age.
+
+<<prob4b1summary, echo = TRUE>>=
+summary(prob_i_full)$coefficients
+@
+
+We are 95\% confident that the odds of CHD for a female are between
+\(\Sexpr{sprintf('1 - \\exp(%.3f + %.2f \\times %.4f) = %.1f\\%%',
+                 prob_i_sum['female', 'Estimate'], qnorm(0.975),
+                 prob_i_sum['female', 'Std. Error'],
+                 (1 - exp(prob_i_sum['female', c('Estimate', 'Std. Error')] %*%
+                       c(1, qnorm(0.975)))) * 100)}\) and
+\(\Sexpr{sprintf('1 - \\exp(%.3f %.2f \\times %.4f) = %.3f\\%%',
+                 prob_i_sum['female', 'Estimate'], qnorm(0.025),
+                 prob_i_sum['female', 'Std. Error'],
+                 (1 - exp(prob_i_sum['female', c('Estimate', 'Std. Error')] %*%
+                       c(1, qnorm(0.025)))) * 100)}\) lower than the odds of
+CHD for males of the same age.
+
+\item%ii
+{\it Controlling for age and sex, what effect does serum cholesterol level have
+on the odds of coronary heart disease?}
+
+I removed \Sexpr{sum(is.na(fram$scl))} individuals with missing serum
+cholesterol values from the dataset and binned cholesterol level into
+quartiles. The plot below shows the empirical odds by age and serum
+cholesterol bin.
+
+<<prob4b2plot>>=
+# Plot for 4(b)ii.
+ggplot(fram %>% filter(!is.na(scl)) %>%
+         mutate(
+           Age = cut(age, quantile(age, seq(0, 1, 0.1)), include.lowest = TRUE),
+           Cholesterol = cut(scl, quantile(scl, seq(0, 1, 0.25)), include.lowest = TRUE),
+           Sex = ifelse(sex == 1, 'Male', ifelse(sex == 2, 'Female', NA))
+         ) %>%
+         group_by(Age, Sex, Cholesterol) %>%
+         summarise(`Odds of CHD` = mean(chdfate) / (1 - mean(chdfate))) %>%
+         ungroup,
+       aes(y = `Odds of CHD`, x = Age, col = Sex, shape = Cholesterol)) +
+  geom_point() +
+  scale_color_manual(values = c('black', 'grey')) +
+  ggtitle('Empirical Odds of CHD, by Binned Age and Serum Cholesterol')
+@
+
+The reduced model is
+\begin{align*}
+Y_{i} &\sim \mathrm{Binomial}(1, \mu_{i}); \\
+\mathrm{logit}(\mu_{i}) &= \beta_{0} + \beta_{1}\mathrm{age}_{i}
++ \beta_{2}\mathrm{female}
+\end{align*}
+and the full model is
+\begin{align*}
+Y_{i} &\sim \mathrm{Binomial}(1, \mu_{i}); \\
+\mathrm{logit}(\mu_{i}) &= \beta_{0} + \beta_{1}\mathrm{age}_{i}
++ \beta_{2}\mathrm{female}_{i} + \beta_{3}\mathrm{scl}.
+\end{align*}
+
+<<prob4b2anova, echo = TRUE>>=
+prob_ii_reduced <- glm(chdfate ~ age + female, data = fram,
+                       subset = !is.na(scl), family = binomial)
+prob_ii_full <- glm(chdfate ~ age + female + scl, data = fram,
+                    subset = !is.na(scl), family = binomial)
+anova(prob_ii_reduced, prob_ii_full, test = 'LRT')
+@
+<<prob4b2>>=
+prob_ii_anova <- anova(prob_ii_reduced, prob_ii_full, test = 'LRT')
+prob_ii_sum <- summary(prob_ii_full)$coefficients
+@
+
+With an LRT statistic of \(\chi^{2}_{\Sexpr{prob_ii_anova[2, 'Df']}}
+= \Sexpr{sprintf('%.2f', prob_ii_anova[2, 'Deviance'])}\) and a p-value
+\(\Sexpr{format.pval(prob_ii_anova[2, 'Pr(>Chi)'], digits = 4, eps = 0.0001)}\),
+there is very strong evidence that serum cholesterol level is associated with
+the odds of CHD after accounting for age and sex.
+
+<<prob4b2summary, echo = TRUE>>=
+summary(prob_ii_full)$coefficients
+@
+
+We are 95\% confident that the odds of CHD for individuals with a given
+serum cholesterol level are between
+\(\Sexpr{sprintf('\\exp(%.5f %.2f \\times %.6f) - 1 = %.3f\\%%',
+                 prob_ii_sum['scl', 'Estimate'], qnorm(0.025),
+                 prob_ii_sum['scl', 'Std. Error'],
+                 (exp(prob_ii_sum['scl', c('Estimate', 'Std. Error')] %*%
+                       c(1, qnorm(0.025))) - 1) * 100)}\) and
+\(\Sexpr{sprintf('\\exp(%.5f + %.2f \\times %.6f) - 1 = %.3f\\%%',
+                 prob_ii_sum['scl', 'Estimate'], qnorm(0.975),
+                 prob_ii_sum['scl', 'Std. Error'],
+                 (exp(prob_ii_sum['scl', c('Estimate', 'Std. Error')] %*%
+                       c(1, qnorm(0.975))) - 1) *100)}\) higher that the odds
+of CHD for those of the same age and sex with serum cholesterol one unit lower.
+
+\item%iii
+{\it Controlling for age and sex, does the effect of serum cholesterol level on
+the odds of coronary heart disease differ among different levels of body mass
+index? If so, how?}
+
+I omitted the \Sexpr{sum(is.na(fram$scl) | is.na(fram$bmi))} individuals who
+were missing cholesterol or BMI values, and binned BMI into thirds. The
+plot shows the empirical odds of CHD by age, paneled vertically by BMI.
+
+<<prob4b3plot, fig.height = 6>>=
+# Plot for 4(b)iii.
+ggplot(fram %>% filter(!is.na(scl), !is.na(bmi)) %>%
+         mutate(
+           Age = cut(age, quantile(age, seq(0, 1, 0.1)), include.lowest = TRUE),
+           Cholesterol = cut(scl, quantile(scl, seq(0, 1, 0.25)), include.lowest = TRUE),
+           BMI = paste('BMI in', cut(bmi, quantile(bmi, seq(0, 1, 1/3)), include.lowest = TRUE)),
+           Sex = ifelse(sex == 1, 'Male', ifelse(sex == 2, 'Female', NA))
+         ) %>%
+         group_by(Age, Sex, Cholesterol, BMI) %>%
+         summarise(`Odds of CHD` = mean(chdfate) / (1 - mean(chdfate))) %>%
+         ungroup,
+       aes(y = `Odds of CHD`, x = Age, col = Sex, shape = Cholesterol)) +
+  geom_point() +
+  facet_grid(BMI ~ .) +
+  scale_color_manual(values = c('black', 'grey')) +
+  ggtitle('Empirical Odds of CHD, by Age, Cholesterol, and BMI')
+@
+
+The reduced model is
+\begin{align*}
+Y_{i} &\sim \mathrm{Binomial}(1, \mu_{i}); \\
+\mathrm{logit}(\mu_{i}) &= \beta_{0} + \beta_{1}\mathrm{age}_{i}
++ \beta_{2}\mathrm{female}_{i} + \beta_{3}\mathrm{scl}_{i}
++\beta_{4}\mathrm{bmi}_{i}
+\end{align*}
+and the full model is
+\begin{align*}
+Y_{i} &\sim \mathrm{Binomial}(1, \mu_{i}); \\
+\mathrm{logit}(\mu_{i}) &= \beta_{0} + \beta_{1}\mathrm{age}_{i}
++ \beta_{2}\mathrm{female}_{i} + \beta_{3}\mathrm{scl}_{i}
++\beta_{4}\mathrm{bmi}_{i} + \beta_{5}\mathrm{scl}_{i}\times\mathrm{bmi}_{i}.
+\end{align*}
+
+<<prob4b3anova, echo = TRUE>>=
+prob_iii_reduced <- glm(chdfate ~ age + female + scl + bmi, data = fram,
+                       subset = !is.na(scl) & !is.na(bmi), family = binomial)
+prob_iii_full <- glm(chdfate ~ age + female + scl * bmi, data = fram,
+                    subset = !is.na(scl) & !is.na(bmi), family = binomial)
+anova(prob_iii_reduced, prob_iii_full, test = 'LRT')
+@
+<<prob4b3>>=
+prob_iii_anova <- anova(prob_iii_reduced, prob_iii_full, test = 'LRT')
+prob_iii_sum <- summary(prob_iii_full)$coefficients
+@
+
+With an LRT statistic of \(\chi^{2}_{\Sexpr{prob_iii_anova[2, 'Df']}}
+= \Sexpr{sprintf('%.2f', prob_iii_anova[2, 'Deviance'])}\) and a p-value
+\(\Sexpr{format.pval(prob_iii_anova[2, 'Pr(>Chi)'],
+                     digits = 4, eps = 0.0001)}\),
+there is no evidence that the association between serum cholesterol level and
+the odds of CHD depend on BMI after accounting for age and sex.
+
+<<prob4b3summary, echo = TRUE>>=
+summary(prob_iii_full)$coefficients
+@
+
+We are 95\% confident that, among people of a given age, sex, and BMI, the
+percent difference in the odds of CHD between individuals with a given serum
+cholesterol level and individuals with one unit less of serum cholesterol
+is between
+\(\Sexpr{sprintf('1 - \\exp(%.7f %.2f \\times %.5f) = %.4f\\%%',
+                 prob_iii_sum['scl:bmi', 'Estimate'], qnorm(0.025),
+                 prob_iii_sum['scl:bmi', 'Std. Error'],
+                 (1 - exp(prob_iii_sum['scl:bmi',
+                                       c('Estimate', 'Std. Error')] %*%
+                       c(1, qnorm(0.025)))) * 100 )}\) lower and
+\(\Sexpr{sprintf('\\exp(%.7f + %.2f \\times %.6f) - 1 = %.4f\\%%',
+                 prob_iii_sum['scl:bmi', 'Estimate'], qnorm(0.975),
+                 prob_iii_sum['scl:bmi', 'Std. Error'],
+                 (exp(prob_iii_sum['scl:bmi', c('Estimate', 'Std. Error')] %*%
+                       c(1, qnorm(0.975))) - 1) * 100)}\) higher than the
+percent difference in the odds of CHD between individuals with a given serum
+cholesterol level and individuals with one unit less of serum cholesterol for
+people of the same age and sex, with one unit lower BMI.
+
+\end{enumerate}
+
+\end{enumerate}
+
+\end{enumerate}
+
+\pagebreak
+\appendix
+\section*{Appendix: Code for the Plots in 4(b)}
+
+<<appendix>>=
+opts_chunk$set(eval = FALSE, echo = TRUE)
+@
+\vspace{-11pt}
+<<prob4b1plot>>=
+@
+\vspace{-11pt}
+<<prob4b2plot>>=
+@
+\vspace{-11pt}
+<<prob4b3plot>>=
+@
+
+\end{document}
+
