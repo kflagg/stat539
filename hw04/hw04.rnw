@@ -1,0 +1,581 @@
+\documentclass[11pt]{article}
+\usepackage{fullpage,graphicx,float,amsmath,amsfonts,enumitem,fancyhdr,hyperref}
+
+\setlist{parsep=5.5pt}
+\setlength{\parindent}{0pt}
+
+\newcommand\assignment{Stat 539 Homework 4}
+\newcommand\myname{Kenny Flagg}
+\newcommand\duedate{February 21, 2017}
+
+\pagestyle{fancy}
+\lhead{\assignment}
+\chead{\duedate}
+\rhead{\myname}
+\setlength{\headheight}{18pt}
+\setlength{\headsep}{2pt}
+
+\title{\assignment}
+\author{\myname}
+\date{\duedate}
+
+\begin{document}
+\maketitle
+
+<<setup, echo = FALSE, message = FALSE, cache = FALSE>>=
+library(knitr)
+library(extrafont)
+opts_chunk$set(echo = FALSE, comment = '', message = FALSE,
+               eval = TRUE, show.signif.stars = FALSE,
+               fig.align = 'center', fig.width = 6.5, fig.height = 3,
+               fig.pos = 'H', size = 'footnotesize', dev = 'pdf',
+               dev.args = list(family = 'CM Roman', pointsize = 11))
+knit_theme$set('print')
+
+library(xtable)
+options(xtable.floating = FALSE,
+        xtable.sanitize.rownames.function = function(x) x,
+        xtable.sanitize.colnames.function = function(x) x,
+        width = 80, scipen = 2, show.signif.stars = FALSE)
+
+library(dplyr)
+library(ggplot2)
+theme_set(theme_bw())
+@
+
+\begin{enumerate}
+
+\item%1
+{\it Agresti Exercise 5.17 (p. 196-7) Use the following toy data to illustrate
+comments in Section 5.5 about grouped versus ungrouped binary data in the
+effect on the deviance:}
+\begin{center}\begin{tabular}{ccc}
+\(x\) & Number of Trials & Number of Successes \\
+\hline
+0 & 4 & 1 \\
+1 & 4 & 2 \\
+2 & 4 & 4 \\
+\end{tabular}\end{center}
+{\it Denote by \(M_{0}\) the null model \(\mathrm{logit}(\pi_{i})=\beta_{0}\)
+and by \(M_{1}\) the model \(\mathrm{logit}(\pi_{i})
+=\beta_{0}+\beta_{1}x_{i}\).}
+
+\begin{enumerate}
+
+\item%a
+{\it Create a data file in two ways, entering the data as (i) ungrouped data:
+\(n_{i} = 1\), \(i = 1,\dots,12\), (ii) grouped data: \(n_{i} = 4\),
+\(i = 1,2,3\). Fit \(M_{0}\) and \(M_{1}\) for each data file. Show that the
+deviances for \(M_{0}\) and \(M_{1}\) differ for the two forms of data entry.
+Why is this?}
+
+Please see page~\pageref{prob1acode} for my R code to create the datasets and
+fit the models. The deviances differ because these are different models fit to
+dfferent datasets wth different numbers of observations.
+
+\begin{center}
+<<prob1a, results = 'asis'>>=
+prob1_ungrouped <- data.frame(
+  x = rep(0:2, each = 4),
+  Success = c(1, 0, 0, 0,  1, 1, 0, 0,  1, 1, 1, 1)
+)
+
+m0_ungrouped <- glm(Success ~ 1, data = prob1_ungrouped, family = binomial)
+m1_ungrouped <- glm(Success ~ x, data = prob1_ungrouped, family = binomial)
+
+prob1_grouped <- data.frame(
+  x = 0:2,
+  Trials = rep(4, 3),
+  Successes = c(1, 2, 4)
+)
+
+m0_grouped <- glm(cbind(Successes, Trials - Successes) ~ 1,
+                  data = prob1_grouped, family = binomial)
+m1_grouped <- glm(cbind(Successes, Trials - Successes) ~ x,
+                  data = prob1_grouped, family = binomial)
+
+prob1_deviances <- data.frame(
+  `\\(M_{0}\\) Deviance` = c(
+    Grouped = deviance(m0_grouped),
+    Ungrouped = deviance(m0_ungrouped)
+  ),
+  `\\(M_{1}\\) Deviance` = c(
+    Grouped = deviance(m1_grouped),
+    Ungrouped = deviance(m1_ungrouped)
+  ),
+  Difference = c(
+    Grouped = deviance(m0_grouped) - deviance(m1_grouped),
+    Ungrouped = deviance(m0_ungrouped) - deviance(m1_ungrouped)
+  ),
+  check.names = FALSE
+)
+
+xtable(prob1_deviances, digits = 4)
+@
+\end{center}
+
+\item%b
+{\it Show that the difference between the deviances for \(M_{0}\) and
+\(M_{1}\) is the same for each form of data entry. Why is this? (Thus, the
+data file format does not matter for inference, but it does matter for
+goodness-of-fit testing.)}
+
+The differences in deviance are the same because, even though the datasets
+differ, they are equivalent ways to present the same information. Thus the
+estimated proportion of successes \(\hat{\pi}_{i}\) for each value of
+\(x_{i}\) will be equal for both models, and thus the estimated model
+coefficients will also be equal so \(M_{1}\) should have the same amount of
+improvement over \(M_{0}\) for both data formats. Let \(\hat{\beta}_{0}^{*}\)
+denote the coefficient estimate for \(M_{0}\) and let \(\hat{\beta}_{0}\),
+\(\hat{\beta}_{1}\) be the estimates for \(M_{1}\).
+
+For the ungrouped data, note that \(w_{i}=n_{i}=1\) for \(i=1,\dots,12\), so
+the deviances are
+\pagebreak
+\begin{multline*}
+D_{0} = 2 \sum_{i=1}^{12} y_{i} \left[\log(y_{i})
+- \hat{\beta}_{0}^{*}
++ \log\left(1+\exp\left(\hat{\beta}_{0}^{*}\right)\right)\right] \\
++ 2 \sum_{i=1}^{12} (1-y_{i}) \left[\log(1-y_{i})
++ \log\left(1+\exp\left(\hat{\beta}_{0}^{*}\right)\right)\right]
+\end{multline*}
+\vspace{-5.5pt}and\vspace{-5.5pt}
+\begin{multline*}
+D_{1} = 2 \sum_{i=1}^{12} y_{i} \left[\log(y_{i})
+- \hat{\beta}_{0} - \hat{\beta}_{1}x_{i}
++ \log\left(1+\exp\left(\hat{\beta}_{0}
++ \hat{\beta}_{1}x_{i}\right)\right)\right] \\
++ 2 \sum_{i=1}^{12} (1-y_{i}) \left[\log(1-y_{i})
++ \log\left(1+\exp\left(\hat{\beta}_{0}
++ \hat{\beta}_{1}x_{i}\right)\right)\right]
+\end{multline*}
+\vspace{-5.5pt}so then\vspace{-5.5pt}
+\begin{multline*}
+D_{0} - D_{1} = 2 \sum_{i=1}^{12} y_{i} \left[\hat{\beta}_{0}
++ \hat{\beta}_{1}x_{i} - \hat{\beta}_{0}^{*}
++\log\left(\frac{1+\exp\left(\hat{\beta}_{0}^{*}\right)}
+{1+\exp\left(\hat{\beta}_{0}+\hat{\beta}_{1}x_{i}\right)}\right)\right] \\
++ 2 \sum_{i=1}^{12}(1-y_{i})
+\log\left(\frac{1+\exp\left(\hat{\beta}_{0}^{*}\right)}
+{1+\exp\left(\hat{\beta}_{0}+\hat{\beta}_{1}x_{i}\right)}\right).
+\end{multline*}
+Denote the grouped response as \(y_{j}^{(g)}\) and note that
+\(w_{j}^{(g)} = n_{j}^{(g)} = 4\) for \(j = 1, 2, 3\). The deviances are
+\begin{multline*}
+D_{0}^{(g)} = 2 \sum_{j=1}^{3} n_{j}^{(g)} y_{j}^{(g)}
+\left[\log\left(y_{j}^{(g)}\right)
+- \hat{\beta}_{0}^{*}
++ \log\left(1+\exp\left(\hat{\beta}_{0}^{*}\right)\right)\right] \\
++ 2 \sum_{j=1}^{3} n_{j}^{(g)} \left(1-y_{j}^{(g)}\right)
+\left[\log\left(1-y_{j}^{(g)}\right)
++ \log\left(1+\exp\left(\hat{\beta}_{0}^{*}\right)\right)\right]
+\end{multline*}
+\vspace{-5.5pt}and\vspace{-5.5pt}
+\begin{multline*}
+D_{1}^{(g)} = 2 \sum_{j=1}^{3} n_{j}^{(g)} y_{j}^{(g)}
+\left[\log\left(y_{j}^{(g)}\right)
+- \hat{\beta}_{0} - \hat{\beta}_{1}x_{j}
++ \log\left(1+\exp\left(\hat{\beta}_{0}
++ \hat{\beta}_{1}x_{j}\right)\right)\right] \\
++ 2 \sum_{j=1}^{3} n_{j}^{(g)} \left(1-y_{j}^{(g)}\right)
+\left[\log\left(1-y_{j}^{(g)}\right)
++ \log\left(1+\exp\left(\hat{\beta}_{0}
++ \hat{\beta}_{1}x_{j}\right)\right)\right]
+\end{multline*}
+\vspace{-5.5pt}so then\vspace{-5.5pt}
+\begin{multline*}
+D_{0}^{(g)} - D_{1}^{(g)} = 2 \sum_{j=1}^{3} n_{j}^{(g)} y_{j}
+\left[\hat{\beta}_{0} + \hat{\beta}_{1}x_{j} - \hat{\beta}_{0}^{*}
++\log\left(\frac{1+\exp\left(\hat{\beta}_{0}^{*}\right)}
+{1+\exp\left(\hat{\beta}_{0}+\hat{\beta}_{1}x_{j}\right)}\right)\right] \\
++ 2 \sum_{j=1}^{3} n_{j}^{(g)} \left(1-y_{j}^{(g)}\right)
+\log\left(\frac{1+\exp\left(\hat{\beta}_{0}^{*}\right)}
+{1+\exp\left(\hat{\beta}_{0}+\hat{\beta}_{1}x_{j}\right)}\right).
+\end{multline*}
+Therefore, \(D_{0}-D_{1}=D_{0}^{(g)}-D_{1}^{(g)}\) because
+\(\displaystyle n_{j}^{(j)} y_{j}^{(g)} = \sum_{i:x_{i}=x_{j}} y_{i}\).
+
+\end{enumerate}
+
+\item%2
+{\it Agresti Exercise 5.30 (p. 199) In one of the first studies of the link
+between lung cancer and smoking, Richard Doll and Austin Bradford Hill
+collected data from 20 hostpitals in London, England. Each patient admitted
+with lung cancer in the preceeding year was queried about their smoking
+behavior. For each of the 709 patients admitted, they recorded the smoking
+behavior of a noncancer patient at the same hospital of the same gender and
+within the same 5-year grouping on age. A smoker was defined as a person who
+had smoked at least one cigarette a day for at least a year. Of the 709 cases
+having lung cancer, 688 reported being smokers. Of the 709 controls, 650
+reported being smokers. Specify a relevant logistic regression model, explain
+what can be estimated and what cannot, and conduct a statistical analysis.}
+
+This is a case-control study with observed counts as shown in the table below.
+\begin{center}\begin{tabular}{c|cc}
+& \multicolumn{2}{|c}{Lung Cancer} \\
+Smoker & Yes & No \\
+\hline
+Yes & 688 & 650 \\
+No & 21 & 59
+\end{tabular}\end{center}
+A logistic regression model with cancer as the response and smoking as the
+predictor is
+\begin{align*}
+n_{i}y_{i} &\sim \mathrm{Binomial}(n_{i}, \pi_{i}), \\
+\mathrm{logit}(\pi_{i}) &= \beta_{0} + \beta_{1} x_{i}
+\end{align*}
+where \(y_{i}\) is the sample proportion of people in the \(i\)th group who
+have lung cancer, \(i=1\) for nonsmokers and \(i=2\) for smokers, \(n_{i}\)
+is the size of the \(i\)th group, \(\pi_{i}\) is the probability that an
+individual in the \(i\)th group gets lung cancer, and \(x_{i}\) is a smoking
+indicator variable with \(x_{1}=0\) for the nonsmoker group and \(x_{2}=1\)
+for the smoker group.
+
+Because the numbers of people with and without cancer are fixed, we cannot
+estimate the population probability of having lung cancer. (In the estimated
+model, \(\exp(\hat{\beta}_{0})\) is the proportion of nonsmokers in the
+\emph{sample} who have lung cancer.) However, we can estimate the probability
+of being a smoker conditional on cancer status, and we can estimate the odds
+ratio for smoking status between people with and without cancer, which is
+equal to the odds ratio for cancer between smokers and nonsmokers
+(\(\exp(\hat{\beta}_{1})\)).
+\begin{center}
+<<hiddenopts1>>=
+options(xtable.sanitize.colnames.function = sanitize)
+@
+<<prob2, eval = FALSE, echo = TRUE>>=
+prob2 <- data.frame(Cancer = c(688, 21), No_Cancer = c(650, 59), Smoker = c(1, 0))
+prob2_fit <- glm(cbind(Cancer, No_Cancer) ~ Smoker, data = prob2, family = binomial)
+xtable(summary(prob2_fit)$coefficients, digits = 5)
+@
+<<prob2, results = 'asis'>>=
+@
+\end{center}
+With a Wald p-value of
+\Sexpr{sprintf('%.5f', summary(prob2_fit)$coefficients['Smoker', 'Pr(>|z|)'])},
+we have very strong evidence that the odds of lung cancer differ between
+smokers and nonsmokers.
+
+\pagebreak
+\item%3
+{\it Using the data given in Agresti Exercise 5.35 (p. 201), answer the
+following questions:}
+
+\begin{enumerate}
+
+\item%a
+{\it Enter the data into R in grouped format. Show the R code used to create
+the data frame and the first few rows.}
+
+<<prob3a, echo = TRUE>>=
+prob3 <- data.frame(AZT = c(1, 1, 0, 0), White = c(0, 1, 0, 1),
+                    AIDS = c(11, 14, 12, 32), No_AIDS = c(52, 93, 43, 81))
+print(prob3)
+@
+
+\item%b
+{\it Calculate and interpret the sample marginal odds ratio of developing
+AIDS for those taking AZT immediately to those who wait until their T cells
+showed severe immune weakness.}
+
+The table below shows the marginal counts.
+\begin{center}\begin{tabular}{c|cc}
+& AIDS & No AIDS \\
+\hline
+AZT Immediately & 25 & 145 \\
+AZT Later & 44 & 124
+\end{tabular}\end{center}
+Then the estimated odds ratio is
+\begin{equation*}
+\widehat{OR} = \frac{(25/145)}{(44/124)} = 0.486.
+\end{equation*}
+For people in this sample, the odds of getting AIDS for those who recieved
+AZT immediately are 51.4\% lower than the odds of getting AIDS for those who
+waited to get AZT.
+
+\item%c
+{\it Calculate and interpret the sample conditional odds ratio of developing
+AIDS for those taking AZT immediately to those who wait until their T cells
+showed severe immune weakness, for black subjects.}
+
+The contingency table for blacks is
+\begin{center}\begin{tabular}{c|cc}
+& AIDS & No AIDS \\
+\hline
+AZT Immediately & 11 & 52 \\
+AZT Later & 12 & 43
+\end{tabular}\end{center}
+so the estimated odds ratio is
+\begin{equation*}
+\widehat{OR}_{\mathrm{black}} = \frac{(11/52)}{(12/43)} = 0.758.
+\end{equation*}
+For black people in this sample, the odds of getting AIDS for those who
+recieved AZT immediately are 24.2\% lower than the odds of getting AIDS for
+those who waited to get AZT.
+
+\item%d
+{\it Do these data exhibit Simpson's Paradox? Why or why not?}
+
+No, these data do not exhibit Simpson's Paradox because, both marginally and
+conditionally, recieving AZT immediately is associated with lower odds of
+AIDS.
+
+\item%e
+{\it Fit a logistic regression model to these data using AZT treatment and
+race as predictors, with no interaction.}
+
+\begin{center}
+<<prob3e, eval = FALSE, echo = TRUE>>=
+prob3_fit <- glm(cbind(AIDS, No_AIDS) ~ White + AZT, data = prob3, family = binomial)
+xtable(summary(prob3_fit)$coefficients, digits = 5)
+@
+<<prob3e, results = 'asis'>>=
+@
+\end{center}
+
+\begin{enumerate}
+
+\item%i
+{\it Write the equation of the fitted model, clearly defining any variables
+and symbols used. Write a sentence interpreting each of the estimated
+coefficients.}
+
+The estimated model is
+\begin{align*}
+n_{i} y_{i} &\sim \mathrm{Binomial}(n_{i}, \pi_{i}) \\
+\mathrm{logit}(\pi_{i})
+&= \Sexpr{sprintf('%0.5f', coef(prob3_fit)['(Intercept)'])}
++ \Sexpr{sprintf('%0.5f', coef(prob3_fit)['White'])} \times \mathrm{White}_{i}
+\Sexpr{sprintf('%0.5f', coef(prob3_fit)['AZT'])} \times \mathrm{AZT}_{i}
+\end{align*}
+where
+\begin{itemize}
+\item\(n_{i}\) is the number of people in group \(i\),
+\item\(y_{i}\) is the proportion of people in group \(i\) who developed AIDS,
+\item\(\pi_{i}\) is the probability that an individual in group \(i\)
+develops AIDS,
+\item\(\mathrm{White}_{2}=\mathrm{White}_{4}=1\) indicate groups of white
+people and \(\mathrm{White}_{1}=\mathrm{White}_{3}=0\) indicate groups of
+black people, and
+\item\(\mathrm{AZT}_{1}=\mathrm{AZT}_{2}=1\) indicate groups of people who
+recieved AZT immediately and \(\mathrm{AZT}_{3}=\mathrm{AZT}_{4}=0\) indicate
+groups of people who watied to recieve AZT.
+\end{itemize}
+
+\(\hat{\beta}_{0}=\Sexpr{sprintf('%0.5f', coef(prob3_fit)['(Intercept)'])}\):
+For black people who wait to recieve AZT, we estimate that the odds of
+developing AIDS are
+\(\exp(\Sexpr{sprintf('%0.5f', coef(prob3_fit)['(Intercept)'])})
+=\Sexpr{sprintf('%0.3f', exp(coef(prob3_fit)['(Intercept)']))}\) to 1.
+
+\(\hat{\beta}_{1}=\Sexpr{sprintf('%0.5f', coef(prob3_fit)['White'])}\):
+For white people with a given AZT treatment, we estimate that the odds of
+developing AIDS are
+\(\exp(\Sexpr{sprintf('%0.5f', coef(prob3_fit)['White'])} - 1)
+=\Sexpr{sprintf('%0.2f\\%%', 100 * (exp(coef(prob3_fit)['White']) - 1))}\)
+lower than odds of developing AIDS for black people with the same AZT
+treatment.
+
+\(\hat{\beta}_{2}=\Sexpr{sprintf('%0.5f', coef(prob3_fit)['AZT'])}\):
+For people of a given race who recieve AZT immediately, we estimate that the
+odds of developing AIDS are
+\(1 - \exp(\Sexpr{sprintf('%0.5f', coef(prob3_fit)['AZT'])})
+=\Sexpr{sprintf('%0.1f\\%%', 100 * (1 - exp(coef(prob3_fit)['AZT'])))}\)
+lower than odds of developing AIDS for people of the same race who wait to
+recieve AZT.
+
+\pagebreak
+\item%ii
+{\it Express the conditional odds ratio of developing AIDS for those taking
+AZT immediately to those who wait until their T cells showed severe immune
+weakness, for black subjects, in terms of the estimated model coefficients.
+Calculate and interpret a 95\% confidence interval for this quantity. How
+does your estimate compare to the sample conditional odds ratio found in
+part (c)?}
+
+The conditional odds ratio estimated by the model is
+\begin{align*}
+\widehat{OR}_{\mathrm{black}}
+&= \frac{\exp(\hat{\beta}_{0}+\hat{\beta}_{2})}{\exp(\hat{\beta}_{0})} \\
+&= \frac{\exp(\Sexpr{sprintf('%0.5f', coef(prob3_fit)['(Intercept)'])}
+\Sexpr{sprintf('%0.5f', coef(prob3_fit)['AZT'])})}
+{\exp(\Sexpr{sprintf('%0.5f', coef(prob3_fit)['(Intercept)'])})} \\
+&= \exp(\Sexpr{sprintf('%0.5f', coef(prob3_fit)['AZT'])}) \\
+&= \Sexpr{sprintf('%0.5f', exp(coef(prob3_fit)['AZT']))}
+\end{align*}
+with an approximate 95\% confidence interval of
+\begin{equation*}
+\exp(\Sexpr{sprintf('%0.5f', coef(prob3_fit)['AZT'])}
+\pm \Sexpr{sprintf('%0.2f', qnorm(0.975))} \times
+\Sexpr{sprintf('%0.5f', summary(prob3_fit)$coefficients['AZT', 'Std. Error'])})
+= (\Sexpr{paste(sprintf('%.5f', exp(
+                        coef(prob3_fit)['AZT'] + qnorm(c(0.025, 0.975)) *
+                        summary(prob3_fit)$coefficients['AZT', 'Std. Error'])),
+                collapse = ',')}).
+\end{equation*}
+We are 95\% confidence that, for people of a given race who recieved AZT
+immediately, the odds of developing AIDS are between
+\Sexpr{paste(sprintf('%.1f\\%%', 100 * (1 - exp(
+               coef(prob3_fit)['AZT'] + qnorm(c(0.975, 0.025)) *
+               summary(prob3_fit)$coefficients['AZT', 'Std. Error']))),
+                collapse = ' and ')}
+lower than the odds of developing AIDS for people of the same race who waited
+to recieve AZT.
+
+This odds ratio estimate is a bit smaller than the one from part (c), but the
+estimate from (c) is inside this confidence interval and therefore not
+unreasonable. Computing the odds ratio from the conditional table is
+equivalent to estimating the odds ratio from an interaction model, so we
+should not expect them to be equal. The no-interaction model forces the
+conditional odds ratio to be the same for both races, and in fact the odds
+ratio computed from the model is very close to the marginal odds ratio from
+part (b).
+
+\item%iii
+{\it Use the deviance of this model to perform a goodness of fit test.}
+
+We are testing \(H_{0}\): the model has an adequate fit against \(H_{a}\):
+a more complicated model is needed. Under \(H_{0}\), the residual deviance
+follows a \(\chi^{2}_{\Sexpr{prob3_fit$df.residual}}\) distribution. The
+residual deviance is \Sexpr{sprintf('%.3f', deviance(prob3_fit))} with a
+p-value of \Sexpr{sprintf('%.4f', pchisq(deviance(prob3_fit),
+                                          prob3_fit$df.residual,
+                                          lower.tail = FALSE))}.
+There is no evidence of an inadequate fit.
+
+\pagebreak
+\item%iv
+{\it Plot the deviance residuals versus the fitted values. Which covariate
+groups contribute most to lack of fit? how?}
+
+<<prob3eiv, echo = TRUE>>=
+ggplot(prob3 %>% mutate(AZT = ifelse(AZT == 1, 'Immediately', 'Later'),
+                        Race = ifelse(White == 1, 'White', 'Black')),
+       aes(x = fitted(prob3_fit),
+           y = residuals(prob3_fit, type = 'deviance'),
+           col = AZT, shape = Race)) +
+  geom_point() +
+  scale_color_manual(values = c('black', 'grey')) +
+  xlab('Fitted Value') +
+  ylab('Deviance Residual') +
+  ggtitle('Deviance Residuals versus Fitted Values')
+@
+
+The largest magnitude deviance residual is for blacks who recieved AZT
+immediately. This model underestimates the odds of developing AIDS for that
+group.
+
+\end{enumerate}
+
+\end{enumerate}
+
+\pagebreak
+\item%4
+{\it Agresti Exercise 5.38 (p. 201). Your analysis should include a short
+description of how you chose your model with relevant tests, model checking
+methods including Hosmer-Lemeshow goodness of fit test and residual analysis,
+interpretation of the coefficients in the final model, and a short paragraph
+summarizing the results. Your write-up should be no more than two pages.
+Upload a well-commented .R file of the relevant R code you used for the data
+analysis process to the ``Homework 4 R Code'' D2L Assignment folder.}
+
+<<prob4_1, include = FALSE>>=
+source('flagg_hw04_prob4.r')
+@
+
+The data are from a study of the associants between sore throat outcomes after
+surgery and the type of device used to secure the airway. A total of
+\Sexpr{nrow(SoreThroat)+1} patients were included in the sample and had either
+a tracheal tube or a laryngeal mask airway used during surgery. One patient
+who recieved a tracheal tube had an unusually long surgery of 135 minutes and
+will be omitted from the analysis. The remaining
+\Sexpr{sum(SoreThroat$T == 1)} patients who recieved tracheal tubes had
+surgeries lasting from
+\Sexpr{SoreThroat %>% filter(T == 1) %>%
+         range(.$D) %>% paste(collapse = ' to ')}
+minutes, with a mean of
+\Sexpr{(SoreThroat %>% filter(T == 1))$D %>%
+         mean %>% sprintf('%.2f', .)}
+minutes, and \Sexpr{(SoreThroat %>% filter(T == 1))$Y %>% sum} of these
+patients had sore throats upon waking. The \Sexpr{sum(SoreThroat$T == 0)}
+patients who had laryngeal mask airways used had surgeries
+\Sexpr{SoreThroat %>% filter(T == 0) %>%
+         range(.$D) %>% paste(collapse = ' to ')}
+minutes long, with a mean of
+\Sexpr{(SoreThroat %>% filter(T == 0))$D %>%
+         mean %>% sprintf('%.2f', .)}
+minutes, and \Sexpr{(SoreThroat %>% filter(T == 0))$Y %>% sum} of these
+patients had sore throats afterwards.
+
+The observed surgery durations and sore throat outcomes appear in
+Figure~\ref{fig:prob4_2} along with smoothed curves to approximate the
+proportion of patients with a given surgery duration and device who got sore
+throats. The proportion with a sore throat increases with time and tends to
+be higher for patients who recieved the laryngeal mask airways. Both of the
+curves dip downward at some point but this is likely because few patients in
+the sample had surgeries of those durations rather than being an actual
+feature of the relationship between the device and the sore throat outcome.
+
+<<prob4_2, warning = FALSE, fig.cap = 'Plot showing the observed sore throat outcomes (points, semitransparent and jittered slightly to reduce overlap) versus the duration of the surgery, colored by device. The curves are local polynomial smoothers approximating the proportion of patients using each device who wake up with a sore throat after a surgery of a given duration.'>>=
+print(p)
+@
+
+I begin by fitting the main effects model
+\begin{align*}
+y_{i} &\sim \mathrm{Binomial}(1, \pi_{i}) \\
+\mathrm{logit}(\pi_{i}) &= \beta_{0} + \beta_{1} d_{i} + \beta_{2} t_{i}
+\end{align*}
+where \(y_{i}=1\) if patient \(i\) had a sore throat and 0 otherwise,
+\(\pi_{i}\) is the \(i\)th patient's true probability of getting a sore
+throat, \(d_{i}\) is the duration of patient \(i\)'s surgery in minutes, and
+\(t_{i}=1\) if patient \(i\) had a tracheal tube used and 0 otherwise, for
+\(i=1,2,\dots,\Sexpr{nrow(SoreThroat)}\).
+The coefficient estimates appear in Table~\ref{prob4tab}. I used the
+Hosmer-Lemeshow goodness of fit test with four groups to asses model adequacy.
+Due to the small sample size, the group with the smallest estimated
+probabilities only had 1.5 expected sore throats, but the other three groups
+each had expected sore throat counts of at least 4.6. The goodness of fit test
+statistic is \(\chi^{2}_{\Sexpr{hl_gof[,'df']}}
+= \Sexpr{sprintf('%.3f', hl_gof[,'chisqstat'])}\) with a p-value of
+\Sexpr{sprintf('%.5f', hl_gof[,'pVal'])} giving no evidence of a lack of fit.
+
+<<prob4_3, results = 'asis'>>=
+print(xtable(summary(fit_initial)$coefficients, digits = 5, label = 'prob4tab',
+             caption = 'Estimated logistic regression coefficients.'),
+      floating = TRUE, pos = 'H')
+@
+
+There is very strong evidence of an association between surgery duration and
+the odds of a sore throat after controlling for the device type (p-value of
+\Sexpr{sprintf('%.5f', summary(fit_initial)$coef['D', 'Pr(>|z|)'])});
+for patients with given device, the odds of waking with a sore throat are
+an estimated
+\Sexpr{sprintf('%.2f\\%%',
+         100 * (exp(summary(fit_initial)$coefficients)['D', 'Estimate'] - 1))}
+higher the odds of a sore throat for patients with the same type of device
+and a surgery one minute shorter. There is weak evidence of an association
+between the device type and the odds of a sore throat after controlling for the
+sugery duration (p-value of
+\Sexpr{sprintf('%.5f', summary(fit_initial)$coef['T', 'Pr(>|z|)'])});
+for patients with tracheal tubes, the odds of waking with a sore throat are
+an estimated
+\Sexpr{sprintf('%.1f\\%%',
+         100 * (1 - exp(summary(fit_initial)$coefficients)['T', 'Estimate']))}
+lower the odds of a sore throat for patients with a laryngeal mask airway and
+the same surgery duration.
+
+\end{enumerate}
+
+\pagebreak
+\appendix
+\section*{R Code for Problem 1}
+
+<<appendixsetup>>=
+opts_chunk$set(eval = FALSE, echo = TRUE)
+@
+\label{prob1acode}
+<<prob1a>>=
+@
+
+\end{document}
+
