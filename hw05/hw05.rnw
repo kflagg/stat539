@@ -1,0 +1,578 @@
+\documentclass[11pt]{article}
+\usepackage{fullpage,float,amsmath,amsfonts,enumitem,fancyhdr,hyperref}
+
+\setlist{parsep=5.5pt}
+\setlength{\parindent}{0pt}
+
+\newcommand\assignment{Stat 539 Homework 5}
+\newcommand\myname{Kenny Flagg}
+\newcommand\duedate{March 9, 2017}
+
+\pagestyle{fancy}
+\lhead{\assignment}
+\chead{\duedate}
+\rhead{\myname}
+\setlength{\headheight}{18pt}
+\setlength{\headsep}{2pt}
+
+\title{\assignment}
+\author{\myname}
+\date{\duedate}
+
+\begin{document}
+\maketitle
+
+<<setup, echo = FALSE, message = FALSE, cache = FALSE>>=
+library(knitr)
+library(extrafont)
+opts_chunk$set(echo = FALSE, comment = '', message = FALSE,
+               eval = TRUE, show.signif.stars = FALSE,
+               fig.align = 'center', fig.width = 6.5, fig.height = 3,
+               fig.pos = 'H', size = 'footnotesize', dev = 'pdf',
+               dev.args = list(family = 'CM Roman', pointsize = 11))
+knit_theme$set('print')
+
+library(xtable)
+options(xtable.floating = FALSE,
+         xtable.sanitize.rownames.function = function(x) x,
+#        xtable.sanitize.colnames.function = function(x) x,
+        width = 80, scipen = 2, show.signif.stars = FALSE)
+
+library(dplyr)
+library(ggplot2)
+theme_set(theme_bw())
+@
+
+\begin{enumerate}
+
+\item%1
+{\it Agresti Exercise 6.1 (p.~223-4). The multivariate generalization of the
+exponential dispersion family is}
+\begin{equation*}
+f(\mathbf{y}_{i};\boldsymbol{\theta}_{i},\phi)
+=\exp\left\{\left[\mathbf{y}_{i}^{T}\boldsymbol{\theta}_{i}
+-b\left(\boldsymbol{\theta}_{i}\right)\right] / a(\phi)
++c\left(\mathbf{y}_{i},\phi\right)\right\},
+\end{equation*}
+{\it where \(\boldsymbol{\theta}_{i}\) is the natural parameter
+(a \((c - 1) \times 1\) vector).}
+
+{\it Show that the multinomial variate
+\(\mathbf{y}=(y_{1},\dots,y_{c-1})^{T}\) (with \(y_{j}=1\) if outcome \(j\)
+occurred and 0 otherwise) for a single trial with parameters
+\((\pi_{1},\dots,\pi_{c-1})\) has distribution in the (\(c-1\))-parameter
+exponential dispersion family, with baseline-category logits as natural
+parameters.}
+
+The probability mass function is
+\begin{align*}
+f(\mathbf{y};\boldsymbol{\theta},\phi)
+&= \left(\prod_{i=1}^{c-1} \pi_{i}^{y_{i}}\right)
+\left(1-\sum_{j=1}^{c-1} \pi_{j}\right)^{1-\sum_{i=1}^{c-1} y_{i}} \\
+&= \exp\left\{\sum_{i=1}^{c-1} y_{i}\log\left(\pi_{i}\right)
++ \left(1-\sum_{i=1}^{c-1} y_{i}\right)
+\log\left(1-\sum_{j=1}^{c-1}\pi_{j}\right)\right\} \\
+&= \exp\left\{\sum_{i=1}^{c-1} y_{i}\log\left(\pi_{i}\right)
++ \log\left(1-\sum_{j=1}^{c-1}\pi_{j}\right)
+- \sum_{i=1}^{c-1} y_{i} \log\left(1-\sum_{j=1}^{c-1}\pi_{j}\right)\right\} \\
+&= \exp\left\{\sum_{i=1}^{c-1} y_{i}\left[\log\left(\pi_{i}\right)
+- \log\left(1-\sum_{j=1}^{c-1}\pi_{j}\right)\right]
++ \log\left(1-\sum_{j=1}^{c-1}\pi_{j}\right)\right\} \\
+&= \exp\left\{\sum_{i=1}^{c-1} y_{i}
+\log\left(\frac{\pi_{i}}{1-\sum_{j=1}^{c-1}\pi_{j}}\right)
++ \log\left(1-\sum_{j=1}^{c-1}\pi_{j}\right)\right\} \\
+&= \exp\left\{\sum_{i=1}^{c-1} y_{i}
+\log\left(\frac{\pi_{i}}{1-\sum_{j=1}^{c-1}\pi_{j}}\right)
++ \frac{c-1}{c-1} \log\left(1-\sum_{j=1}^{c-1}\pi_{j}\right) \right. \\
+&\qquad\qquad\qquad\qquad\qquad
+- \left.\frac{1}{c-1} \sum_{i=1}^{c-1}\log\left(\pi_{i}\right)
++ \frac{1}{c-1} \sum_{i=1}^{c-1}\log\left(\pi_{i}\right)\right\} \\
+&= \exp\left\{\left[\sum_{i=1}^{c-1} y_{i}
+\log\left(\frac{\pi_{i}}{1-\sum_{j=1}^{c-1}\pi_{j}}\right)
+- \frac{1}{c-1} \sum_{i=1}^{c-1}\log\left(\frac{\pi_{i}}
+{1-\sum_{j=1}^{c-1}\pi_{j}}\right)\right]
++ \frac{1}{c-1} \sum_{i=1}^{c-1}\log\left(\pi_{i}\right)\right\} \\
+\end{align*}
+\(\displaystyle\phantom{f(\mathbf{y};\boldsymbol{\theta},\phi)}
+= \exp\left\{\left[\mathbf{y}^{T}\boldsymbol{\theta}
+- \frac{\mathbf{1}^{T}\boldsymbol{\theta}}{c-1}\right]/1
++ \frac{1}{c-1} \sum_{i=1}^{c-1}\log\left(\pi_{i}\right)\right\}\)
+
+so this is a member of the exponential dispersion family with natural
+parameter
+\begin{equation*}
+\boldsymbol{\theta} = \begin{pmatrix}
+\log\left(\frac{\pi_{1}}{1-\sum_{j=1}^{c-1}}\right) & \cdots &
+\log\left(\frac{\pi_{c-1}}{1-\sum_{j=1}^{c-1}}\right) 
+\end{pmatrix}^{T},
+\end{equation*}
+dispersion parameter
+\begin{equation*}
+\phi = \sum_{i=1}^{c-1}\log\left(\pi_{i}\right),
+\end{equation*}
+and \(a(\phi)=1\),
+\(b(\boldsymbol{\theta})=\frac{\mathbf{1}^{T}\boldsymbol{\theta}}{c-1}\),
+and \(c(\mathbf{y},\phi)=\frac{\phi}{c-1}\).
+
+\item%2
+{\it The data in \texttt{Alligators.csv} (on course webpage) is from a study
+of factors influencing the primary food choice of alligators. The study
+captured 219 alligators in four Florida lakes. The nominal response variable
+is the primary food type, in volume, found in an alligator's stomach: F =
+fish, I = invertebrate, R = reptile, B = bird, O = other. (The other category
+consisted of amphibian, mammal, plant material, stones or other debris, or no
+food or dominant type.) The study also classified the alligators according to
+the lake captured (1 = Hancock, 2 = Oklawaha, 3 = Trafford, 4 = George),
+gender (1 = male, 2 = female), and size (1 = small (\(\leq\)2.3 meters long),
+2 = large (\(>\)2.3 meters long)).}
+
+\begin{enumerate}
+
+\item%a
+{\it Produce two plots that illuminate the relationship between one or more of
+the explanatory variables and primary food type. (Since these are all
+categorical variables, you may need to be creative!) Write a few sentences
+describing what each plot shows you about these data.}
+
+<<prob2a1, results = 'hide'>>=
+source('flagg_hw05_probs-2-3-5.r')
+print(plot2a1)
+@
+
+Across all lakes, fish and invertebrates are the most common primary food
+types, except at Hancock Lake where fish was most common and ``other'' was the
+second most common.
+
+<<prob2a2>>=
+print(plot2a2)
+@
+
+Fish and invertebrates are the most common primary food types among small
+alligators of both genders. Among large alligators, a smaller proportion had
+invertebrates as the primary food type; for large males this was made up for
+by larger proportions with fish or reptiles as the primary food type compared
+to small males, while large females had bigger proportions with fish or birds
+as their primary food type than small females did.
+
+\item%b
+{\it Fit the baseline-category logit model for alligator food choice based on
+an indicator variable for size (\(s = 1\) if small, \(s = 0\) if large) and
+indicator variables for each lake except Lake George (\(L_{H}\), \(L_{O}\),
+\(L_{T}\), \(L_{G}\)). Use fish as the baseline category. Write the equation
+of the fitted model. Choose two of the estimated coefficients and write a
+sentence interpreting each of the chosen coefficients.}
+
+The estimated model is
+\begin{align*}
+<<prob2b1, results = 'asis'>>=
+mfittab <- function(model, ...){
+    s <- summary(model)
+    tab.mfit <- do.call(rbind, lapply(s$lab[-1], function(l, b){
+      coefs <- s$coefficients[l,]
+      RRR <- exp(coefs)
+      SE <- s$standard.errors[l,]
+      zStat <- coefs / SE
+      pVal <- 2 * pnorm(abs(zStat), lower.tail = FALSE)
+      CI95.lo <- exp(coefs + qnorm(0.025) * SE)
+      CI95.hi <- exp(coefs + qnorm(0.975) * SE)
+      return(data.frame(
+        Comparison = paste('Level', l, 'vs. Level', b),
+        Term = model$coefnames,
+        RRR, SE, zStat, pVal, CI95.lo, CI95.hi
+      ))
+    }, s$lab[1])) %>%
+    mutate(Comparison = ifelse(duplicated(Comparison), NA,
+                               as.character(Comparison)))
+  return(xtable(tab.mfit, ...))
+}
+#print(mfittab(gator2_fit, digits = 3),
+#  hline.after = c(-1, seq(0, 20, 5)),
+#  include.rownames = FALSE)
+
+coefs <- coef(gator2_fit)
+
+for(l in gator2_fit$lab[-1]){
+  cat(sprintf('\\log\\left(\\frac{\\pi_{%s}}{\\pi_{%s}}\\right)
+    &= %.3f %s %.3f s %s %.3f L_{H} %s %.3f L_{O} %s %.3f L_{T} %s',
+    l, gator2_fit$lab[1], coefs[l, 1],
+    ifelse(coefs[l, 2] > 0, '+', ''), coefs[l, 2],
+    ifelse(coefs[l, 3] > 0, '+', ''), coefs[l, 3],
+    ifelse(coefs[l, 4] > 0, '+', ''), coefs[l, 4],
+    ifelse(coefs[l, 5] > 0, '+', ''), coefs[l, 5],
+    ifelse(l == gator2_fit$lab[length(gator2_fit$lab)], '.', ', \\\\ ')))
+}
+@
+\end{align*}
+
+\(\exp(\Sexpr{sprintf('%.3f', coefs['B', 2])})
+= \Sexpr{sprintf('%.3f', exp(coefs['B', 2]))}\): At any lake, the conditional
+odds of birds as the primary food type versus fish as the primary food type
+are estimated to be
+\Sexpr{sprintf('%.1f\\%%', 100 * (1 - exp(coefs['B', 2])))} lower for small
+alligators than for large alligators.
+
+\(\exp(\Sexpr{sprintf('%.3f', coefs['O', 3])})
+= \Sexpr{sprintf('%.3f', exp(coefs['O', 3]))}\): For alligators of a given
+size, the conditional odds of ``other'' as the primary food type versus fish
+as the primary food type are estimated to be
+\Sexpr{sprintf('%.1f\\%%', 100 * (exp(coefs['O', 3]) - 1))}
+higher at Lake Hancock than at Lake George.
+
+\pagebreak
+\item%c
+{\it Calculate and interpret a 95\% confidence interval for the effect of size
+on the conditional odds \(\pi_{I}/\pi_{R}\) adjusting for lake, where
+\(\pi_{I}\) is the probability an alligator's primary food type is
+invertebrate, and \(\pi_{R}\) is the probability an alligator's primary food
+type is reptile.}
+
+I used the \texttt{LinContr.mfit} function to estimate
+\(\exp(\beta_{I,s}-\beta_{R,s})\), where \(\beta_{I,s}\) and \(\beta_{R,s}\)
+are the coefficients of the size term in the models for
+\(\mathrm{logit}\left(\pi_{I}/\pi_{F}\right)\) and
+\(\mathrm{logit}\left(\pi_{R}/\pi_{F}\right)\) respectively.
+
+<<prob2d1, results = 'hide'>>=
+contr2d <- LinContr.mfit(contr.names = c('I:s', 'R:s'), contr.coef = c(1, -1),
+                         gator2_fit)
+@
+
+We are 95\% confident that, at given lake, the conditional odds of
+invertebrates as the primary food type versus reptiles as the primary food
+type are between
+\Sexpr{sprintf('%.1f\\%% and %s\\%%',
+               100 * (contr2d$ci95.lo - 1),
+               prettyNum(100 * (contr2d$ci95.hi - 1),
+                         big.mark = ',', digits = 1))}
+higher for small alligators than for large alligators.
+\begin{center}\small
+<<prob2d2, results = 'asis'>>=
+LinContr.xtable <- function(contr.names,contr.coef, model, ...){
+  beta.hat <- as.vector(t(summary(model)$coefficients))
+  se <- as.vector(t(summary(model)$standard.errors))
+  cov.beta <- vcov(model)
+  contr.index <- is.element(dimnames(cov.beta)[[1]], contr.names)
+  beta.hat <- beta.hat[contr.index]
+  cov.beta <- cov.beta[contr.index,contr.index]
+  est <- contr.coef %*% beta.hat
+  RRR.est <- exp(est)
+  SE.est <- sqrt(contr.coef %*% cov.beta %*% contr.coef)
+  zStat <- est / SE.est
+  pVal <- 2 * pnorm(abs(zStat), lower.tail = FALSE)
+  CI95.lo <- exp(est + qnorm(0.025) * SE.est)
+  CI95.hi <- exp(est + qnorm(0.975) * SE.est)
+  results <- data.frame(
+    RRR.est,
+    SE.est,
+    zStat,
+    pVal,
+    CI95.lo,
+    CI95.hi,
+    row.names = sapply(seq_len(length(contr.names) - 1),
+                  function(i){
+                    return(paste('Test of \\(H_{0}\\):',
+                                  contr.coef[i], '*',
+                                  contr.names[i], '+',
+                                  contr.coef[i + 1], '*',
+                                  contr.names[i + 1], '= 0'))
+                  })
+  )
+  return(xtable(results, ...))
+}
+LinContr.xtable(contr.names = c('I:s', 'R:s'), contr.coef = c(1, -1),
+                gator2_fit, digits = 3)
+@
+\end{center}
+
+\item%d
+{\it What is the estimated probability that a small alligator in Lake Oklawaha
+has invertebrates as the primary food choice?}
+
+I used R to compute
+\begin{equation*}
+\hat{\pi}_{I}|\{s=1, L_{H}=0, L_{O}=1, L_{T}=0\}
+= \frac{e^{\eta_{I}}}
+{1 + e^{\eta_{B}} + e^{\eta_{I}} + e^{\eta_{O}} + e^{\eta_{R}}}
+= \Sexpr{sprintf('%.3f', pI_smallO)}
+\end{equation*}
+(see code submission).
+
+There is an estimated \Sexpr{sprintf('%.1f\\%%', 100 * pI_smallO)} chance that
+a small alligator in Lake Oklawaha has invertebrates as its primary food type.
+
+\item%e
+{\it An alternative fitting approach for the baseline-category logit model
+fits binary logistic models separately for the \(c - 1\) pairings of
+responses. The estimates have larger standard errors than the maximum
+likelihood estimates for simultaneous fitting of the \(c - 1\) logits, but
+Begg and Gray (1984) showed that the efficiency loss is minor when the
+response category having highest prevalence is the baseline. Illustrate, by
+showing that the fit using categories fish and invertebrate alone is}
+\begin{equation*}
+\log\left(\frac{\hat{\pi}_{I}}{\hat{\pi}_{F}}\right)
+= -1.69 + 1.66 s - 1.78 L_{H} + 1.05 L_{O} + 1.22 L_{T}
+\end{equation*}
+{\it with standard error values (0.43, 0.62, 0.49, 0.52) for the effects.
+Compare with the model in part (b).}
+
+The coefficient estimates are somewhat different; between the two models none
+of the estimates even agree to the first digit after the decimal but none
+differ by more than about 0.2. The standard errors for the binary logistic
+regression model are all a little bigger than the standard errors for the
+multinomial logistic regression model.
+\begin{center}
+<<prob2e1, results = 'asis'>>=
+sum_IF <- cbind(summary(gator2_IF)$coefficients[,c('Estimate', 'Std. Error')],
+                summary(gator2_fit)$coefficients['I',],
+                summary(gator2_fit)$standard.errors['I',])
+rownames(sum_IF)[-1] <- paste0('\\(', c('s', 'L_{H}', 'L_{O}', 'L_{T}'), '\\)')
+colnames(sum_IF) <- c('Binary Est.', 'Binary SE',
+                      'Multinom. Est.', 'Multinom. SE')
+xtable(sum_IF, digits = 3)
+@
+\end{center}
+
+\end{enumerate}
+
+\item%3
+{\it For the alligator food choice data in the previous problem, at one of the
+lakes the alligators' actual length (rather than a size indicator variable)
+was measured in meters. Download the data from this lake here:}
+\begin{center}\vspace{-11pt}
+\url{http://www.stat.ufl.edu/~aa/glm/data/Alligators3.dat}.
+\end{center}\vspace{-11pt}
+{\it Read the data into R and fit the baseline-category logit model for
+alligator food choice based on length. (Note that only fish, invertebrates,
+and other food choice categories were recorded at this lake).}
+
+\begin{enumerate}
+
+\item%a
+{\it Choose one of the ``length'' coefficients and write a sentence
+interpreting this coefficient.}
+
+For alligators at Lake George of a given length, the conditional odds of
+invertebrates as the primary food type versus fish as the primary food type
+are estimated to be
+\Sexpr{sprintf('%.1f\\%%', 100 * (1 - exp(coef(gator3_fit)['I', 'length'])))}
+lower than the conditional odds of invertebrates as the primary food type
+versus fish as the primary food type for alligators at Lake George that are
+one meter shorter.
+\begin{center}
+<<prob3a1, results = 'asis'>>=
+print(mfittab(gator3_fit, digits = 3),
+  hline.after = c(-1, seq(0, 4, 2)),
+  include.rownames = FALSE)
+@
+\end{center}
+
+\item%b
+{\it Produce a single well-labeled plot of the estimated multinomial
+probabilities (\(y\)-axis) versus length (\(x\)-axis) by food choice category
+(line type and/or color with legend). Turn in the R code you used to fit the
+model and create the plot. Write a few sentences describing the features of
+the plot.}
+
+<<prob3b1, fig.height = 2.75>>=
+print(plot3b)
+@
+
+For the shortest alligators, we estimate about a 0.75 probability of
+invertebrates as the primary food type, but this probability quickly decreases
+to near 0 as length increases. The shortest alligators have about a 0.25
+estimated probability of fish as the primary food and this probability
+increases with length; fish is estimated to be the most likely primary food
+for alligators over about 1.75m, and alligators over 3m have an estimated 0.75
+probability that of fish as the primary food. The estimated probability of
+other food types is relatively low for all alligators but increases with
+length.
+
+\end{enumerate}
+
+\item%4
+{\it Agresti Exercise 6.20 (p.~226-7) The following R output shows output from
+fitting a cumulative logit model to data from the US 2008 General Social
+Survey. For subject \(i\) let \(y_{i}\) = belief in existence of heaven (1 =
+yes, 2 = unsure, 3 = no), \(x_{i1}\) = gender (1 = female, 0 = male) and
+\(x_{i2}\) = race (1 = black, 0 = white). State the model fitted here, and
+interpret the race and gender effects. Test goodness-of-fit and construct
+confidence intervals for the effects.}
+\begin{knitrout}\footnotesize
+\definecolor{shadecolor}{rgb}{1, 1, 1}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{> cbind}\hlstd{(race, gender, y1, y2, y3)}
+\end{alltt}
+\begin{verbatim}
+     race gender  y1  y2 y3
+[1,]    1      1  88  16  2
+[2,]    1      0  54   7  5
+[3,]    0      1 397 141 24
+[4,]    0      0 235 189 39
+\end{verbatim}
+\begin{alltt}
+\hlkwd{> summary}\hlstd{(}\hlkwd{vglm}\hlstd{(}\hlkwd{cbind}\hlstd{(y1,y2,y3)}\hlopt{~}\hlstd{gender}\hlopt{+}\hlstd{race,}\hlkwc{family}\hlstd{=}\hlkwd{cumulative}\hlstd{(}\hlkwc{parallel}\hlstd{=T)))}
+\end{alltt}
+\begin{verbatim}
+              Estimate  Std. Error  z value
+(Intercept):1   0.0763      0.0896   0.8515
+(Intercept):2   2.3224      0.1352  17.1749
+gender          0.7696      0.1225   6.2808
+race            1.0165      0.2106   4.8266
+Residual deviance: 9.2542 on 4 degrees of freedom
+Log-likelihood: -23.3814 on 4 degrees of freedom
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\textbf{Models:}
+
+The theoretical model is
+\begin{equation*}
+\mathrm{logit}\left(P\left(Y_{i} \leq j\right)\right)
+= \alpha_{j} + \beta_{1} x_{i1} + \beta_{2} x_{i2}
+\end{equation*}
+for \(j=1,2\), where \(x_{i1}=1\) if respondent \(i\) is female and 0 if
+respondent \(i\) is male, and \(x_{i2}=1\) if respondent \(i\) is black and 0
+if respondent \(i\) is white.
+
+The estimated model is
+\begin{align*}
+\mathrm{logit}\left(P\left(Y_{i} \leq 1\right)\right)
+&= 0.0763 + 0.7696 x_{i1} + 1.0165 x_{i2}, \\
+\mathrm{logit}\left(P\left(Y_{i} \leq 2\right)\right)
+&= 2.3224 + 0.7696 x_{i1} + 1.0165 x_{i2}.
+\end{align*}
+
+\textbf{Interpretations:}
+
+\(\exp(0.7696)=215.9\): For individuals of a given race, the odds of being in
+any specified belief category or below are 115.9\% higher for women than for
+men.
+
+\(\exp(1.0165)=276.3\): For individuals of a given gender, the odds of being
+in any specified belief category or below are 176.3\% higher for black people
+than for white people.
+
+\textbf{Confidence Intervals:}
+
+\(\exp(0.7696 \pm 1.96 \times 0.1225)=(1.698, 2.745)\): For individuals of a
+given race, we are 95\% confident that the true odds of being in any specified
+belief category or below are between 69.8\% and 174.5\% higher for women than
+for men.
+
+\(\exp(1.0165 \pm 1.96 \times 0.2106)=(1.829, 4.175)\): For individuals of a
+given gender, we are 95\% confident that the true odds of being in any
+specified belief category or below are between 82.9\% and 317.5\% higher for
+black people than for white people.
+
+\textbf{Goodness of Fit:}
+
+The deviance statistic tests \(H_{0}\): the model describes the data
+adequately against \(H_{a}\): a more general model is needed. Under \(H_{0}\),
+the deviance follows a \(\chi^{2}_{4}\) distribution. The observed deviance is
+\(D=9.2542\) with a p-value of
+\Sexpr{sprintf('%.3f', pchisq(9.2542, 4, lower.tail = FALSE))}, giving
+moderate evidence against an adequate fit.
+
+
+\item%5
+{\it Agresti Exercise 6.21 (p.~227). Refer to the previous exercise. Consider
+the model}
+\begin{equation*}
+\log\left(\pi_{ij}/\pi_{i3}\right)
+= \alpha_{j} + \beta_{j}^{G}x_{i1} + \beta_{j}^{R}x_{i2}, \qquad j = 1,2.
+\end{equation*}
+
+\begin{enumerate}
+
+\item%a
+{\it Fit the model and report prediction equations for
+\(\log\left(\pi_{i1}/\pi_{i3}\right)\),
+\(\log\left(\pi_{i2}/\pi_{i3}\right)\), and
+\(\log\left(\pi_{i1}/\pi_{i2}\right)\).}
+
+I used the \texttt{vglm} function and the \texttt{multinomial} family to fit
+the model (see code submission). The estimated model is
+\begin{align*}
+<<prob5a1, results = 'asis'>>=
+coefs <- coef(prob5_fit)
+cat(sprintf('\\log\\left(\\frac{\\pi_{i1}}{\\pi_{i3}}\\right)
+&= %.4f %s%.4f x_{i1} %s%.4f x_{i2}, \\\\
+\\log\\left(\\frac{\\pi_{i2}}{\\pi_{i3}}\\right)
+&= %.4f %s%.4f x_{i1} %s%.4f x_{i2}.',
+            coefs['(Intercept):1'],
+            ifelse(coefs['gender:1'] < 0, '', '+ '),
+            coefs['gender:1'],
+            ifelse(coefs['race:1'] < 0, '', '+ '),
+            coefs['race:1'],
+            coefs['(Intercept):2'],
+            ifelse(coefs['gender:2'] < 0, '', '+ '),
+            coefs['gender:2'],
+            ifelse(coefs['race:2'] < 0, '', '+ '),
+            coefs['race:2']))
+@
+\end{align*}
+From this, we get
+\begin{equation*}
+<<prob5a2, results = 'asis'>>=
+cat(sprintf('\\log\\left(\\frac{\\pi_{i1}}{\\pi_{i2}}\\right)
+= \\log\\left(\\frac{\\pi_{i1}}{\\pi_{i3}}\\right)
+- \\log\\left(\\frac{\\pi_{i2}}{\\pi_{i3}}\\right)
+= %.4f %s%.4f x_{i1} %s%.4f x_{i2}.',
+            coefs['(Intercept):1'] - coefs['(Intercept):2'],
+            ifelse(coefs['gender:1'] < coefs['gender:2'], '', '+ '),
+            coefs['gender:1'] - coefs['gender:2'],
+            ifelse(coefs['race:1'] < coefs['race:2'], '', '+ '),
+            coefs['race:1'] - coefs['race:2']))
+@
+\end{equation*}
+
+\item%b
+{\it Using the ``yes'' and ``no'' response categories, interpret the
+conditional gender effect using a 95\% confidence interval for an odds ratio.}
+
+For individuals of a given race who responded ``yes'' or ``no'' we are
+95\% confident that the true odds of a yes response are between
+\Sexpr{paste(sprintf('%.1f\\%%',
+                     100 * (exp(confint(prob5_fit)['gender:1',]) - 1)),
+             collapse = ' and ')}
+higher for females than for males.
+\begin{center}
+<<prob5b1, results = 'asis'>>=
+prob5tab <- cbind(Estimate = coefs,
+                  OR = exp(coefs),
+                  exp(confint(prob5_fit)))
+xtable(prob5tab, digits = 3)
+@
+\end{center}
+
+\item%c
+{\it Conduct a likelihood-ratio test of the hypothesis that opinion is
+independent of gender, given race. Interpret.}
+
+We are testing \(H_{0}\): \(\beta_{1}^{G}=\beta_{2}^{G}=0\) versus \(H_{a}\):
+\(\beta_{j}^{G} \neq 0\) for \(j=1\) or \(j=2\). The null model has
+log-likelihood \(\ell_{0}
+=\Sexpr{sprintf('%.3f', prob5_nogender@criterion$loglikelihood)}\) and
+\Sexpr{prob5_nogender@df.residual} residual degrees of fredom, and the
+alternative model has log-likelihood \(\ell_{a}
+=\Sexpr{sprintf('%.3f', prob5_fit@criterion$loglikelihood)}\) and
+\Sexpr{prob5_fit@df.residual} residual degrees of fredom. Under \(H_{0}\),
+the LRT statistic \(-2\left(\ell_{0}-\ell_{a}\right)\) has a \(\chi^{2}\)
+distribution with 2 degrees of freedom. The observed LRT statistic is
+\Sexpr{sprintf('%.3f', -2 * (prob5_nogender@criterion$loglikelihood -
+                                prob5_fit@criterion$loglikelihood))}
+with a p-value of
+\(\Sexpr{format.pval(pchisq(-2 * (prob5_nogender@criterion$loglikelihood -
+                                prob5_fit@criterion$loglikelihood),
+                            prob5_nogender@df.residual -
+                              prob5_fit@df.residual, lower.tail = FALSE),
+                     digits = 4, eps = 0.0001)}\), providing very strong
+evidence of an association between belief and gender after controlling for
+race.
+
+\end{enumerate}
+
+\end{enumerate}
+
+\end{document}

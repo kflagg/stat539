@@ -1,0 +1,711 @@
+\documentclass[11pt]{article}
+\usepackage{fullpage,float,amsmath,amsfonts,enumitem,fancyhdr,hyperref}
+
+\setlist{parsep=5.5pt}
+\setlength{\parindent}{0pt}
+
+\newcommand\assignment{Stat 539 Homework 6}
+\newcommand\myname{Kenny Flagg}
+\newcommand\duedate{April 4, 2017}
+
+\pagestyle{fancy}
+\lhead{\assignment}
+\chead{\duedate}
+\rhead{\myname}
+\setlength{\headheight}{18pt}
+\setlength{\headsep}{2pt}
+
+\title{\assignment}
+\author{\myname}
+\date{\duedate}
+
+\begin{document}
+\maketitle
+
+<<setup, results = 'hide', echo = FALSE, message = FALSE, cache = FALSE>>=
+library(knitr)
+library(extrafont)
+opts_chunk$set(echo = TRUE, prompt = TRUE, comment = NA, message = FALSE,
+               eval = TRUE, show.signif.stars = FALSE,
+               fig.align = 'center', fig.width = 6.5, fig.height = 3,
+               fig.pos = 'H', size = 'footnotesize', dev = 'pdf',
+               dev.args = list(family = 'CM Roman', pointsize = 11))
+knit_theme$set('print')
+
+library(xtable)
+options(xtable.table.placement = 'H',
+#        xtable.sanitize.rownames.function = function(x) x,
+#        xtable.sanitize.colnames.function = function(x) x,
+        width = 80, scipen = 2, show.signif.stars = FALSE)
+
+source('flagg_hw06.r')
+
+read_chunk('flagg_hw06.r',
+           from = c(22, 34, 39, 43, 52, 58, 74, 78, 87,  96, 104, 112),
+           to  =  c(29, 34, 39, 48, 54, 65, 76, 78, 92, 102, 108, 115),
+           labels = c('prob1a1', 'prob1b1', 'prob1c1', 'prob1d1', 'prob1e1',
+                      'prob1f1', 'prob1h1', 'prob1h2', 'prob3c1', 'prob3d1',
+                      'prob3d2', 'prob3f1'))
+@
+
+\begin{enumerate}
+
+\item%1
+{\it In murder trials in 20 Florida counties during 1976 and 1977, the death
+penalty was given in 19 out of 151 cases in which a white killed a white, in
+0 out of 9 cases in which a white killed a black, in 11 out of 63 cases in
+which a black killed a white, and in 6 out of 103 cases in which a black
+killed a black (M. Radelet, \emph{Am. Sociol. Rev.}, 46: 918-927, 1981). We
+will model these data using both log-linear models for contingency tables and
+logistic regression.}
+
+\begin{enumerate}
+
+\item%a
+{\it Enter these data into R as a \texttt{data.frame} with four columns:
+\texttt{Defendant} (race of defendant with levels ``B'' and ``W''),
+\texttt{Victim} (race of victim with levels ``B'' and ``W''), \texttt{Penalty}
+(whether or not death penalty was invoked with levels ``N'' and ``Y''), and
+\texttt{Freq} (cell frequency). Your \texttt{data.frame} should have eight
+rows (not including variable names). Display this \texttt{data.frame} in R.}
+
+<<prob1a1>>=
+@
+
+\pagebreak
+\item%b
+{\it Use the R function \texttt{xtabs} with the \texttt{data.frame} format of
+the data to construct the partial tables needed to study the conditional
+association between defendant's race and the death penalty verdict,
+conditional on victim's race. Find and interpret the sample conditional odds
+ratios, adding 0.5 to each cell to reduce the impact of the zero cell count.}
+
+<<prob1b1>>=
+@
+
+For black victims, \(\displaystyle
+\widehat{OR}_{B} = \frac{
+(\Sexpr{(prob1 %>%
+           filter(Defendant == 'W', Penalty == 'Y', Victim == 'B'))$Freq}+0.5)
+(\Sexpr{(prob1 %>%
+           filter(Defendant == 'B', Penalty == 'N', Victim == 'B'))$Freq}+0.5)}
+{(\Sexpr{(prob1 %>%
+            filter(Defendant == 'W', Penalty == 'N', Victim == 'B'))$Freq}+0.5)
+(\Sexpr{(prob1 %>%
+           filter(Defendant == 'B', Penalty == 'Y', Victim == 'B'))$Freq}+0.5)}
+=
+\Sexpr{sprintf('%.3f',
+((prob1 %>%
+    filter(Defendant == 'W', Penalty == 'Y', Victim == 'B'))$Freq + 0.5) *
+((prob1 %>%
+    filter(Defendant == 'B', Penalty == 'N', Victim == 'B'))$Freq + 0.5) /
+((prob1 %>%
+    filter(Defendant == 'W', Penalty == 'N', Victim == 'B'))$Freq + 0.5) /
+((prob1 %>%
+    filter(Defendant == 'B', Penalty == 'Y', Victim == 'B'))$Freq + 0.5))}\).
+
+The odds of receiving the death penalty for a white defendant accused of
+killing a black victim are an estimated
+\Sexpr{sprintf('%.1f\\%%', 100 * (1 -
+((prob1 %>%
+     filter(Defendant == 'W', Penalty == 'Y', Victim == 'B'))$Freq + 0.5) *
+((prob1 %>%
+    filter(Defendant == 'B', Penalty == 'N', Victim == 'B'))$Freq + 0.5) /
+((prob1 %>%
+    filter(Defendant == 'W', Penalty == 'N', Victim == 'B'))$Freq + 0.5) /
+((prob1 %>%
+    filter(Defendant == 'B', Penalty == 'Y', Victim == 'B'))$Freq + 0.5)))}
+lower than the odds of receiving the death penalty for a black defendant
+accused of killing a black victim.
+
+For white victims, \(\displaystyle
+\widehat{OR}_{W} = \frac{
+(\Sexpr{(prob1 %>%
+           filter(Defendant == 'W', Penalty == 'Y', Victim == 'W'))$Freq}+0.5)
+(\Sexpr{(prob1 %>%
+           filter(Defendant == 'B', Penalty == 'N', Victim == 'W'))$Freq}+0.5)}
+{(\Sexpr{(prob1 %>%
+            filter(Defendant == 'W', Penalty == 'N', Victim == 'W'))$Freq}+0.5)
+(\Sexpr{(prob1 %>%
+           filter(Defendant == 'B', Penalty == 'Y', Victim == 'W'))$Freq}+0.5)}
+=
+\Sexpr{sprintf('%.3f',
+((prob1 %>%
+    filter(Defendant == 'W', Penalty == 'Y', Victim == 'W'))$Freq + 0.5) *
+((prob1 %>%
+    filter(Defendant == 'B', Penalty == 'N', Victim == 'W'))$Freq + 0.5) /
+((prob1 %>%
+    filter(Defendant == 'W', Penalty == 'N', Victim == 'W'))$Freq + 0.5) /
+((prob1 %>%
+    filter(Defendant == 'B', Penalty == 'Y', Victim == 'W'))$Freq + 0.5))}\).
+
+The odds of receiving the death penalty for a white defendant accused of
+killing a white victim are an estimated
+\Sexpr{sprintf('%.1f\\%%', 100 * (1 -
+((prob1 %>%
+     filter(Defendant == 'W', Penalty == 'Y', Victim == 'W'))$Freq + 0.5) *
+((prob1 %>%
+    filter(Defendant == 'B', Penalty == 'N', Victim == 'W'))$Freq + 0.5) /
+((prob1 %>%
+    filter(Defendant == 'W', Penalty == 'N', Victim == 'W'))$Freq + 0.5) /
+((prob1 %>%
+    filter(Defendant == 'B', Penalty == 'Y', Victim == 'W'))$Freq + 0.5)))}
+lower than the odds of receiving the death penalty for a black defendant
+accused of killing a white victim.
+
+\item%c
+{\it Find and interpret the sample marginal odds ratio between defendant's
+race and the death penalty verdict. Do these data exhibit Simpson's paradox?
+Explain.}
+
+<<prob1c1>>=
+@
+
+For victims of either race, \(\displaystyle
+\widehat{OR} = \frac{
+\Sexpr{sum((prob1 %>%
+              filter(Defendant == 'W', Penalty == 'Y'))$Freq)} \times
+\Sexpr{sum((prob1 %>%
+              filter(Defendant == 'B', Penalty == 'N'))$Freq)}}
+{\Sexpr{sum((prob1 %>%
+               filter(Defendant == 'W', Penalty == 'N'))$Freq)} \times
+\Sexpr{sum((prob1 %>%
+              filter(Defendant == 'B', Penalty == 'Y'))$Freq)}}
+=
+\Sexpr{sprintf('%.3f',
+sum((prob1 %>%
+       filter(Defendant == 'W', Penalty == 'Y'))$Freq) *
+sum((prob1 %>%
+       filter(Defendant == 'B', Penalty == 'N'))$Freq) /
+sum((prob1 %>%
+       filter(Defendant == 'W', Penalty == 'N'))$Freq) /
+sum((prob1 %>%
+       filter(Defendant == 'B', Penalty == 'Y'))$Freq))}\).
+
+The odds of receiving the death penalty for a white defendant accused of
+killing a black or white victim are an estimated
+\Sexpr{sprintf('%.1f\\%%', 100 *
+(sum((prob1 %>%
+        filter(Defendant == 'W', Penalty == 'Y'))$Freq) *
+sum((prob1 %>%
+       filter(Defendant == 'B', Penalty == 'N'))$Freq) /
+sum((prob1 %>%
+       filter(Defendant == 'W', Penalty == 'N'))$Freq) /
+sum((prob1 %>%
+       filter(Defendant == 'B', Penalty == 'Y'))$Freq) - 1))}
+higher than the odds of receiving the death penalty for a black defendant
+accused of killing a black or white victim. The marginal odds of the death
+penalty are higher for whites than for blacks, but the conditional odds are
+lower for whites than for blacks regardless of the victim's race, so these
+data exhibit Simpson's paradox. This is because there were fewer cases with
+black victims than white victims, the proportion of death sentences in cases
+with black victims was lower than for cases with white victims, and the
+proportion of white defendents was lower for cases with black victims than
+for cases with white victims.
+
+\item%d
+{\it Fit a logistic regression model which allows you to study the marginal
+association between defendant's race and the death penalty verdict. Use your
+fitted logistic regression model to answer the following questions.}
+
+<<prob1d1, eval = FALSE>>=
+@
+<<prob1d1, echo = FALSE, results = 'asis'>>=
+@
+
+\begin{enumerate}
+
+\item%i
+{\it What is the estimated marginal odds ratio between defendant's race and
+the death penalty verdict? Show your work. (Hint: You should get the same
+answer as in part (c).)}
+
+For cases with a victim of either race, the estimated odds ratio between the
+defendant's race and the death penalty verdict is
+\begin{equation*}
+\widehat{OR} = \exp(\Sexpr{sprintf('%.4f', coef(prob1_marginal)['DefendantW'])})
+= \Sexpr{sprintf('%.3f', exp(coef(prob1_marginal)['DefendantW']))}
+\end{equation*}
+as seen in part (c).
+
+\item%ii
+{\it Calculate and interpret an approximate 95\% confidence interval for the
+marginal odds ratio of the death penalty comparing white defendants to black
+defendants.}
+
+\begin{equation*}
+\exp(\Sexpr{sprintf('%.4f', coef(prob1_marginal)['DefendantW'])}
+\pm 1.96 \times
+\Sexpr{sprintf('%.4f',
+               summary(prob1_marginal)$coefficients['DefendantW',
+                                                    'Std. Error'])})
+= (\Sexpr{paste(sprintf('%.3f',
+                  exp(coef(prob1_marginal)['DefendantW'] +
+                        qnorm(c(0.025, 0.975)) *
+                        summary(prob1_marginal)$coefficients['DefendantW',
+                                                             'Std. Error'])),
+                collapse = ', ')})
+\end{equation*}
+We are 95\% confident that the true odds of the death penalty for a white
+defendant accused of killing a black or white victim are between
+\Sexpr{sprintf('%.1f\\%%', 100 *
+  (1 - exp(coef(prob1_marginal)['DefendantW'] + qnorm(0.025) *
+    summary(prob1_marginal)$coefficients['DefendantW',
+                                         'Std. Error'])))}
+lower and
+\Sexpr{sprintf('%.1f\\%%', 100 *
+  (exp(coef(prob1_marginal)['DefendantW'] + qnorm(0.975) *
+    summary(prob1_marginal)$coefficients['DefendantW',
+                                         'Std. Error']) - 1))}
+higher than the odds of the death penalty for a black defendant accused of
+killing a black or white victim.
+
+\item%iii
+{\it Is there significant statistical evidence to suggest that the defendant's
+race has an effect on the odds of the death penalty? Justify your answer.}
+
+We are testing the null hypothesis of no association between the defendant's
+race and the odds of the death penalty (\(\beta = 0\)) against the alternative
+hypothesis that there is an association between the defendant's race and the
+odds of the death penalty (\(\beta \neq 0\)). There is no evidence of an
+association between the defendant's race and the odds of the death penalty
+(\(z = \Sexpr{sprintf('%.2f',
+                      summary(prob1_marginal)$coefficients['DefendantW',
+                                                           'z value'])}\),
+\(p\text{-value} =
+\Sexpr{sprintf('%.2f',
+       summary(prob1_marginal)$coefficients['DefendantW',
+                                            'Pr(>|z|)'])}\)).
+
+\end{enumerate}
+
+\pagebreak
+\item%e
+{\it Fit a logistic regression model which allows you to study the conditional
+association between defendant's race and the death penalty verdict
+(conditional on victim's race). Assume homogeneous association between
+defendant's race and the death penalty, conditional on victim's race.
+\emph{Use your fitted logistic regression model} to answer the following
+questions.}
+
+<<prob1e1, eval = FALSE>>=
+@
+<<prob1e1, echo = FALSE, results = 'asis'>>=
+@
+
+\begin{enumerate}
+
+\item%i
+{\it What is the estimated conditional odds ratio between defendant's race and
+the death penalty for black victims? for white victims? Show your work. (Note
+that these answers will \emph{not} match the answers in part (b).)}
+
+For cases with black victims, the estimated odds ratio between the defendant's
+race and the death penalty verdict is
+\begin{equation*}
+\widehat{OR}
+= \frac{\exp(\beta_{0}+\beta_{1})}{\exp(\beta_{0})} = \exp(\beta_{1})
+= \exp(\Sexpr{sprintf('%.4f', coef(prob1_conditional)['DefendantW'])})
+= \Sexpr{sprintf('%.3f', exp(coef(prob1_conditional)['DefendantW']))}.
+\end{equation*}
+For cases with white victims, the estimated odds ratio between the defendant's
+race and the death penalty verdict is
+\begin{equation*}
+\widehat{OR}
+= \frac{\exp(\beta_{0}+\beta_{1}+\beta_{2})}{\exp(\beta_{0}+\beta_{2})}
+= \exp(\beta_{1})
+= \exp(\Sexpr{sprintf('%.4f', coef(prob1_conditional)['DefendantW'])})
+= \Sexpr{sprintf('%.3f', exp(coef(prob1_conditional)['DefendantW']))}.
+\end{equation*}
+
+\item%ii
+{\it Calculate and interpret an approximate 95\% confidence interval for the
+conditional odds ratio of the death penalty comparing white defendants to
+black defendants conditioned on victim's race.}
+
+\begin{equation*}
+\exp(\Sexpr{sprintf('%.4f', coef(prob1_conditional)['DefendantW'])}
+\pm 1.96 \times
+\Sexpr{sprintf('%.4f',
+               summary(prob1_conditional)$coefficients['DefendantW',
+                                                       'Std. Error'])})
+= (\Sexpr{paste(sprintf('%.3f',
+                  exp(coef(prob1_conditional)['DefendantW'] +
+                       qnorm(c(0.025, 0.975)) *
+                       summary(prob1_conditional)$coefficients['DefendantW',
+                                                               'Std. Error'])),
+                collapse = ', ')})
+\end{equation*}
+We are 95\% confident that the true odds of the death penalty for a white
+defendant accused of killing a victim of a given race are between
+\Sexpr{sprintf('%.1f\\%%', 100 *
+  (1 - exp(coef(prob1_conditional)['DefendantW'] + qnorm(0.025) *
+    summary(prob1_conditional)$coefficients['DefendantW',
+                                            'Std. Error'])))}
+lower and
+\Sexpr{sprintf('%.1f\\%%', 100 *
+  (exp(coef(prob1_conditional)['DefendantW'] + qnorm(0.975) *
+    summary(prob1_conditional)$coefficients['DefendantW',
+                                            'Std. Error']) - 1))}
+higher than the odds of the death penalty for a black defendant accused of
+killing a victim of the same race.
+
+\pagebreak
+\item%iii
+{\it Is there significant statistical evidence to suggest that the defendant's
+race has an effect on the odds of the death penalty after we control for the
+victim's race? Justify your answer.}
+
+Here, we are testing the null hypothesis of no association between the
+defendant's race and the odds of the death penalty after accounting for the
+victim's race (\(\beta = 0\)) against the alternative hypothesis that there
+is an association between the defendant's race and the odds of the death
+penalty after accounting for the victim's race (\(\beta \neq 0\)). There is
+no evidence of an association between the defendant's race and the odds of
+the death penalty after accounting for the victim's race
+(\(z = \Sexpr{sprintf('%.2f',
+                      summary(prob1_conditional)$coefficients['DefendantW',
+                                                              'z value'])}\),
+\(p\text{-value} =
+\Sexpr{sprintf('%.2f',
+       summary(prob1_conditional)$coefficients['DefendantW',
+                                               'Pr(>|z|)'])}\)).
+
+\end{enumerate}
+
+\item%f
+{\it Fit the following four loglinear models (using the same notation as in
+the book), where D = Defendant, V = Victim, and P = Penalty: (D, V, P), (DV,
+VP), (DV, VP, DP), (DVP). You may use either R function \texttt{glm} or
+\texttt{loglm}. For each of the four fitted models, report the fitted
+conditional odds ratio(s) between Defendant and Penalty, conditioned on
+Victim.}
+
+<<prob1f1>>=
+@
+
+For (D, V, P), \(\widehat{OR} = 1\) because there is no DP term in the model.
+
+For (DV, VP), \(\widehat{OR} = 1\) because there is no DP term in the model.
+
+For (DV, VP, DP), \(\widehat{OR} = \exp\left(\hat{\gamma}^{DP}_{WY}\right)
+= \exp(\Sexpr{sprintf('%.3f',
+                      coef(`prob1_(DV,VP,DP)`)['DefendantW:PenaltyY'])})
+= \Sexpr{sprintf('%.3f',
+                 exp(coef(`prob1_(DV,VP,DP)`)['DefendantW:PenaltyY']))}\).
+
+For (DVP), \(\widehat{OR}_{B}
+= \exp\left(\hat{\gamma}^{DP}_{WY}\right)
+= \exp(\Sexpr{sprintf('%.3f',
+                      coef(`prob1_(DVP)`)['DefendantW:PenaltyY'])})
+\approx \Sexpr{sprintf('%.0f',
+                       exp(coef(`prob1_(DVP)`)['DefendantW:PenaltyY']))}\)
+for cases with black victims, and \(\widehat{OR}_{W}
+= \exp\left(\hat{\gamma}^{DP}_{WY}+\hat{\delta}^{DVP}_{WWY}\right)
+= \exp(\Sexpr{sprintf('%.3f + %.3f',
+                      coef(`prob1_(DVP)`)['DefendantW:PenaltyY'],
+                      coef(`prob1_(DVP)`)['DefendantW:VictimW:PenaltyY'])})
+= \Sexpr{sprintf('%.3f',
+                 exp(coef(`prob1_(DVP)`)['DefendantW:PenaltyY'] +
+                       coef(`prob1_(DVP)`)['DefendantW:VictimW:PenaltyY']))}\)
+for cases with white victims.
+
+\item%g
+{\it Assess the goodness of fit for each of the four models fit in part (f).
+Which model would you choose and why?}
+
+<<prob1g1, echo = FALSE, results = 'asis'>>=
+gofs <- data.frame(
+    Model = c('(D, V, P)', '(DV, VP)', '(DV, VP, DP)', '(DVP)'),
+    `\\(G^{2}\\)` = c(deviance(`prob1_(D,V,P)`), deviance(`prob1_(DV,VP)`),
+                      deviance(`prob1_(DV,VP,DP)`), deviance(`prob1_(DVP)`)),
+    DF = c(`prob1_(D,V,P)`$df.residual, `prob1_(DV,VP)`$df.residual,
+           `prob1_(DV,VP,DP)`$df.residual, `prob1_(DVP)`$df.residual),
+    check.names = FALSE
+  ) %>%
+  mutate(`P-value` = ifelse(Model == '(DVP)', '--', format.pval(
+    pchisq(`\\(G^{2}\\)`, DF, lower.tail = FALSE),
+    digits = 4, eps = 0.0001)))
+print(xtable(gofs, digits = 4, align = 'ccrcc'),
+      include.rownames = FALSE, sanitize.colnames.function = function(x)x)
+@
+
+There is very strong evidence that (D, V, P) is a poor fit. There is no
+evidence that (DV, VP) or (DV, VP, DP) are inadequate. (DVP) is the saturated
+model, so a better fit in not possible. I would use (DV, VP) because it is the
+simplest model that describes the data well.
+
+\item%h
+{\it For your chosen model from part (g), calculate an approximate 95\%
+confidence interval for the conditional odds ratio(s) between Victim and
+Penalty, conditioned on Defendant. Show your work. How does this interval
+compare to the interval calculated in part (e)ii?}
+
+<<prob1h1, eval = FALSE>>=
+@
+<<prob1h1, echo = FALSE, results = 'asis'>>=
+@
+
+For black defendents, the 95\% confidence interval is
+\begin{equation*}
+\exp(\Sexpr{sprintf('%.4f', coef(`prob1_(DV,VP)`)['VictimW:PenaltyY'])}
+\pm 1.96 \times
+\Sexpr{sprintf('%.4f',
+               summary(`prob1_(DV,VP)`)$coefficients['VictimW:PenaltyY',
+                                                     'Std. Error'])})
+= (\Sexpr{paste(sprintf('%.3f',
+                  exp(coef(`prob1_(DV,VP)`)['VictimW:PenaltyY'] +
+                       qnorm(c(0.025, 0.975)) *
+                       summary(`prob1_(DV,VP)`)$coefficients['VictimW:PenaltyY',
+                                                             'Std. Error'])),
+                collapse = ', ')}).
+\end{equation*}
+For white defendents, the standard error is
+<<prob1h2>>=
+@
+so the 95\% confidence interval is
+\begin{equation*}
+\exp(\Sexpr{sprintf('%.4f + %.4f',
+                    coef(`prob1_(DV,VP)`)['DefendantW:VictimW'],
+                    coef(`prob1_(DV,VP)`)['VictimW:PenaltyY'])}
+\pm 1.96 \times
+\Sexpr{sprintf('%.4f',
+               sqrt(c(0, 0, 0, 0, 1, 1) %*% vcov(`prob1_(DV,VP)`) %*%
+                 c(0, 0, 0, 0, 1, 1)))})
+= (\Sexpr{paste(sprintf('%.3f',
+                  exp(coef(`prob1_(DV,VP)`)['VictimW:PenaltyY'] +
+                       qnorm(c(0.025, 0.975)) *
+                       sqrt(c(0, 0, 0, 0, 1, 1) %*% vcov(`prob1_(DV,VP)`) %*%
+                       c(0, 0, 0, 0, 1, 1)))),
+                collapse = ', ')}).
+\end{equation*}
+These confidence intervals differ from the interval in (e)ii in that these
+intervals compare the odds of the death penalty between black and white
+\emph{victims}, while the interval in (e)ii compares the odds of the death
+penalty between black and white \emph{defendants}.
+
+\end{enumerate}
+
+\pagebreak
+\item%2
+{\it Assume that \(\lambda\) has a Gamma distribution with mean \(\mu\) and
+shape parameter \(k > 0\). That is, the pdf of \(\lambda\) is:}
+\begin{equation*}
+f(\lambda) = \frac{(k/\mu)^{k}}{\Gamma(k)} \lambda^{k-1} e^{-k\lambda/\mu}
+\end{equation*}
+{\it and that \(Y|\lambda \sim Pois(\lambda)\). Show that the marginal
+probability mass function of \(Y\) (given \(\mu\) and \(k\))}
+
+\begin{enumerate}
+
+\item%a
+{\it is equal to the negative binomial pmf}
+\begin{equation*}
+p(y|\mu,k) = \frac{\Gamma(y+k)}{\Gamma(k)\Gamma(y+1)}
+\left(\frac{\mu}{\mu+k}\right)^{y}
+\left(\frac{k}{\mu+k}\right)^{k},
+\qquad y = 0, 1, 2,\dots
+\end{equation*}
+
+The joint distribution function of \(Y\) and \(\lambda\) is
+\begin{align*}
+p(y|\lambda)f(\lambda) &= e^{-\lambda}\frac{\lambda^{y}}{y!}
+\frac{(k/\mu)^{k}}{\Gamma(k)} \lambda^{k-1} e^{-k\lambda/\mu} \\
+&= \frac{(k/\mu)^{k}}{\Gamma(k)\Gamma(y+1)} \lambda^{y+k-1}
+e^{-\lambda\left(\frac{\mu+k}{\mu}\right)}
+\end{align*}
+so the marginal distribution of \(Y\) is
+\begin{align*}
+p(y|\mu,k) &= \int_{0}^{\infty} p(y|\lambda)f(\lambda) d\lambda \\
+&= \int_{0}^{\infty} \frac{(k/\mu)^{k}}{\Gamma(k)\Gamma(y+1)} \lambda^{y+k-1}
+e^{-\lambda\left(\frac{\mu+k}{\mu}\right)} d\lambda \\
+&= \frac{(k/\mu)^{k}}{\Gamma(k)\Gamma(y+1)}
+\Gamma(y+k) \left(\frac{\mu}{\mu+k}\right)^{y+k} \\
+&\qquad \times \int_{0}^{\infty} \frac{1}{\Gamma(y+k)}
+\left(\frac{\mu+k}{\mu}\right)^{y+k}
+\lambda^{y+k-1}e^{-\lambda\left(\frac{\mu+k}{\mu}\right)} d\lambda
+\stepcounter{equation}\tag{\theequation}\label{kernel}\ \\
+&= \frac{\Gamma(y+k)}{\Gamma(k)\Gamma(y+1)} \left(\frac{\mu}{\mu+k}\right)^{y}
+\left(\frac{\mu}{\mu+k}\right)^{k} \left(\frac{k}{\mu}\right)^{k} \\
+&= \frac{\Gamma(y+k)}{\Gamma(k)\Gamma(y+1)} \left(\frac{\mu}{\mu+k}\right)^{y}
+\left(\frac{k}{\mu+k}\right)^{k},
+\qquad y = 0, 1, 2, \dots
+\end{align*}
+because the expression inside the integral in \eqref{kernel} is a Gamma
+density. The result is a negative binomial mass function.
+
+\pagebreak
+\item%b
+{\it and is a member of the exponential dispersion family.}
+
+The probability mass function can be written as
+\begin{align*}
+p(y|\mu,k) &= \frac{\Gamma(y+k)}{\Gamma(k)\Gamma(y+1)}
+\left(\frac{\mu}{\mu+k}\right)^{y}
+\left(\frac{k}{\mu+k}\right)^{k} \\
+&= \exp\left[y \log\left(\frac{\mu}{\mu+k}\right)
++ k \log\left(\frac{k}{\mu+k}\right)
++ \log\left(\frac{\Gamma(y+k)}{\Gamma(k)\Gamma(y+1)}\right)\right] \\
+&= \exp\left[y \log\left(\frac{\mu}{\mu+k}\right)
++ k \log\left(1-\frac{\mu}{\mu+k}\right)
++ \log\left(\frac{\Gamma(y+k)}{\Gamma(k)\Gamma(y+1)}\right)\right] \\
+&= \exp\left[y \log\left(\frac{\mu}{\mu+k}\right)
++ \log\left(1-e^{\log\left(\frac{\mu}{\mu+k}\right)}\right)
+/ \left(\frac{1}{k}\right)
++ \log\left(\frac{\Gamma(y+k)}{\Gamma(k)\Gamma(y+1)}\right)\right] \\
+\end{align*}
+which is the exponential family form in the parameterization of
+J{\o}rgensen~(1987), with \(\theta = \log\left(\frac{\mu}{\mu+k}\right)\),
+\(b(\theta) = -\log(1 - e^{\theta})\), \(\phi = k\),
+\(a(\phi) = \frac{1}{\phi}\), and \(c(y,\phi)
+= \log\left(\frac{\Gamma(y+\phi)}{\Gamma(\phi)\Gamma(y+1)}\right)\).
+
+\end{enumerate}
+
+\item%3
+{\it In this problem we will use data obtained from a sexually transmitted
+disease (STD) clinic to determine factors that are associated with the rate
+of reinfection of STDs. The dataset contains aggregated (grouped) data
+including the total number of reinfections per group, the total amount of time
+each group was followed for, and various other covariates. The data can be
+found on the course website at
+\url{http://www.math.montana.edu/shancock/courses/stat539/data/stdgrp.txt}.
+The following variables are available in the dataset:}
+
+\begin{tabular}{ll}
+Variable & Description \\
+\hline
+\texttt{white} &
+Indicator of white race (1=white, 0=black) \\
+\texttt{married} &
+Marital status (1=single, 2=married, 3=divorced/separated) \\
+\texttt{agegrp} &
+Age group (categorized as [13,19], (19,22], and (22,48] ) \\
+\texttt{edugrp} &
+Years of schooling
+(categorized as [6,11.9], (11.9,12.9], (12.9,18]) \\
+\texttt{inftype} &
+Initial infection (1= gonorrhea, 2=chlamydia, 3=both) \\
+\texttt{npartnr} &
+Number of sexual partners
+(categorized as [0,1], (1,2], (2,3], and (3,19]) \\
+\texttt{condom} &
+Condom use (1=always, 0=sometimes/never) \\ 
+\texttt{n.reinfect} &
+Total number of reinfections observed in the group \\ 
+\texttt{yrsfu} &
+Total number of years individuals in the group were followed for
+\end{tabular}
+
+\begin{enumerate}
+
+\item%a
+{\it If we model the total number of reinfections observed in a group
+(\texttt{n.reinfect}) as a Poisson random variable, what variable in the data
+set should serve as the offset term?}
+
+The offset should be \(\log(\texttt{yrsfu})\) because, conditional on the
+other predictors and assuming a homogeneous process, the mean number of
+reinfections observed would be proportional to the time (in person-years)
+that the individuals in the group were followed.
+
+\pagebreak
+\item%b
+{\it Write down the Poisson regression model that shows how the rate of
+reinfection varies with race, education group, initial infection and condom
+use (without interaction terms). Explain, using your model, how the rate is
+related to the actual count of reinfections.}
+
+For race \(i\), education group \(j\), initial infection type \(k\), and
+condom use status \(l\), the number of reinfections \(y_{ijkl}\) is modeled as
+\begin{align*}
+y_{ijkl} &\sim \mathrm{Poisson}(\mu_{ijkl}); \\
+\log(\lambda_{ijkl}) &= \log(t_{ijkl}) + \beta_{0} + \beta^{R}_{i}
++ \beta^{E}_{j} + \beta^{C}_{k} + \beta^{I}_{l}
+\end{align*}
+where \(\lambda_{ijkl}\) is the expected number of reinfection per
+person-year, \(t_{ijkl}\) is the number of person-years the group was
+observed, and \(\mu_{ijkl} = \lambda_{ijkl} t_{ijkl}\) is the expected number
+of reinfections in \(t_{ijkl}\) person-years.
+
+\item%c
+{\it Fit the model in part (b) (show R code and output) and choose two
+estimated coefficients to interpret in context of the problem.}
+
+<<prob3c1, eval = FALSE>>=
+@
+<<prob3c1, echo = FALSE, results = 'asis'>>=
+@
+
+For people of a given age group, infection type, and condom use, the
+annual reinfection rate for whites is estimated to be \(1-\exp(
+\Sexpr{sprintf('%.4f', coef(prob3_rate)['white'])})
+= \Sexpr{sprintf('%.1f\\%%', 100 * (1 - exp(coef(prob3_rate)['white'])))}\)
+lower for whites than for blacks.
+
+For people of a given race, age group, and infection type, the annual
+reinfection rate is estimated to be \(1-\exp(
+\Sexpr{sprintf('%.4f', coef(prob3_rate)['condom'])})
+= \Sexpr{sprintf('%.1f\\%%', 100 * (1 - exp(coef(prob3_rate)['condom'])))}\)
+lower for people who always use condoms than for people who sometimes or
+never use condoms.
+
+\pagebreak
+\item%d
+{\it Create an appropriate plot to examine the data for overdispersion. Refit
+your model accounting for overdispersion using a quasi-Poisson family. How do
+your conclusions change (if at all) after accounting for overdispersion?}
+
+<<prob3d1>>=
+@
+<<prob3d2, eval = FALSE>>=
+@
+<<prob3d2, echo = FALSE, results = 'asis'>>=
+@
+\vspace{-5.5pt}
+On the plot, the circles represent the observed rates and the crosses
+represent the fitted rates. More large rates and rates of zero were observed
+than the fitted model predicts, and the dispersion paramter is large,
+indicating the presence of overdispersion. After correcting the standard
+errors for overdispersion, none of the predictors appear to be associated with
+the reinfection rate.
+
+\item%e
+{\it Do the grouped reinfection counts appear to follow a Poisson
+distribution? Why or why not?}
+
+The plot in (d) shows more observed rates of zero than should be expected for
+a Poisson distribution. The counts do not appear to follow a Poisson
+distribution and might be better described by a zero-inflated model.
+
+\item%f
+{\it If we control for race and education, does condom use have a significant
+effect on the rate of re-infection? Conduct the appropriate likelihood ratio
+test (accounting for overdispersion) to address this question and write a
+conclusion of the test in context of the problem.}
+
+<<prob3f1, eval = FALSE>>=
+@
+<<prob3f1, echo = FALSE, results = 'asis'>>=
+@
+This is a test of the null hypothesis that condom use is not associated with
+the reinfection rate after accounting for race and education
+(\(\beta_{3} = 0\)) versus the alternative hypothesis that condom use is
+associated with the reinfection rate after accounting for race and education
+(\(\beta_{3} \neq 0\)). There is no evidence of an association between
+condom use and the reinfection rate after accounting for race and education
+(\(\chi^{2}_{
+\Sexpr{anova(prob3_reduced, prob3_quasi, test = 'LRT')[2, 'Df']}}
+= \Sexpr{sprintf('%.2f',
+                 anova(prob3_reduced, prob3_quasi,
+                       test = 'LRT')[2, 'Deviance'])}\),
+\(p\text{-value}
+= \Sexpr{sprintf('%.2f',
+                 anova(prob3_reduced, prob3_quasi,
+                       test = 'LRT')[2, 'Pr(>Chi)'])}\)).
+
+\end{enumerate}
+
+\end{enumerate}
+
+\end{document}
