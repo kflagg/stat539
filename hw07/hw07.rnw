@@ -1,0 +1,545 @@
+\documentclass[11pt]{article}
+\usepackage{fullpage,float,amsmath,amsfonts,enumitem,fancyhdr,hyperref}
+
+\setlist{parsep=5.5pt}
+\setlength{\parindent}{0pt}
+
+\newcommand\assignment{Stat 539 Homework 7}
+\newcommand\myname{Kenny Flagg}
+\newcommand\duedate{May 3, 2017}
+
+\pagestyle{fancy}
+\lhead{\assignment}
+\chead{\duedate}
+\rhead{\myname}
+\setlength{\headheight}{18pt}
+\setlength{\headsep}{2pt}
+
+\title{\assignment}
+\author{\myname}
+\date{\duedate}
+
+\begin{document}
+\maketitle
+
+<<setup, include = FALSE, echo = FALSE, message = FALSE, cache = FALSE>>=
+library(knitr)
+library(extrafont)
+opts_chunk$set(echo = TRUE, prompt = TRUE, comment = NA, message = FALSE,
+               eval = TRUE, show.signif.stars = FALSE,
+               fig.align = 'center', fig.width = 6.5, fig.height = 3,
+               fig.pos = 'H', size = 'footnotesize', dev = 'pdf',
+               dev.args = list(family = 'CM Roman', pointsize = 11))
+knit_theme$set('print')
+
+library(xtable)
+options(xtable.table.placement = 'H',
+        xtable.sanitize.rownames.function = function(x) x,
+#        xtable.sanitize.colnames.function = function(x) x,
+        width = 80, scipen = 2, show.signif.stars = FALSE)
+
+source('flagg_hw07.r')
+
+read_chunk('flagg_hw07.r',
+           from = c(10,  96),
+           to  =  c(21, 106),
+           labels = c('prob2_1', 'prob4e2'))
+@
+
+\begin{enumerate}
+
+\item%1
+{\it Section 9.1.1 on p.~287-288 illustrates an example of the effects of
+ignoring correlation within subjects. Derive and verify the two expressions
+for \(var(b)\) and \(var(w)\) in equation (9.1) on p.~288.}
+
+For the between-subject effect,
+\begin{align*}
+var(b) &= var\left(\frac{\bar{y}_{1}^{A} + \bar{y}_{2}^{A}}{2}
+- \frac{\bar{y}_{1}^{B}+\bar{y}_{2}^{B}}{2}\right) \\
+&= \frac{1}{4n^{2}}var\left(\sum_{i=1}^{n}y_{i1}^{A}
++\sum_{i=1}^{n}y_{i2}^{A} - \sum_{i=n}^{n}y_{i1}^{B}
+- \sum_{i=1}^{n}y_{i2}^{B}\right) \\
+&= \frac{1}{4n^{2}}\left(var\left(\sum_{i=1}^{n}y_{i1}^{A}\right)
++ var\left(\sum_{i=1}^{n}y_{i2}^{A}\right)
++ var\left(\sum_{i=n}^{n}y_{i1}^{B}\right)
++ var\left(\sum_{i=1}^{n}y_{i2}^{B}\right)\right. \\
+&\qquad\qquad
++ 2cov\left(\sum_{i=1}^{n}y_{i1}^{A}, \sum_{i=1}^{n}y_{i2}^{A}\right)
+- 2cov\left(\sum_{i=1}^{n}y_{i1}^{A}, \sum_{i=1}^{n}y_{i1}^{B}\right)
+- 2cov\left(\sum_{i=1}^{n}y_{i1}^{A}, \sum_{i=1}^{n}y_{i2}^{B}\right) \\
+&\qquad\qquad
+- \left.2cov\left(\sum_{i=1}^{n}y_{i2}^{A}, \sum_{i=1}^{n}y_{i1}^{B}\right)
+- 2cov\left(\sum_{i=1}^{n}y_{i1}^{A}, \sum_{i=1}^{n}y_{i2}^{B}\right)
++ 2cov\left(\sum_{i=1}^{n}y_{i1}^{B}, \sum_{i=1}^{n}y_{i2}^{B}\right)\right) \\
+&= \frac{1}{4n^{2}}\left(\sum_{i=1}^{n}var(y_{i1}^{A})
++ \sum_{i=1}^{n}var(y_{i2}^{A})
++ \sum_{i=n}^{n}var(y_{i1}^{B})
++ \sum_{i=1}^{n}var(y_{i2}^{B})\right. \\
+&\qquad\qquad
++ 2\sum_{i=1}^{n}\sum_{j=1}^{n}cov(y_{i1}^{A}, y_{j2}^{A})
+- 2\sum_{i=1}^{n}\sum_{j=1}^{n}cov(y_{i1}^{A}, y_{j1}^{B})
+- 2\sum_{i=1}^{n}\sum_{j=1}^{n}cov(y_{i1}^{A}, y_{j2}^{B}) \\
+&\qquad\qquad
+- \left.2\sum_{i=1}^{n}\sum_{j=1}^{n}cov(y_{i2}^{A}, y_{j1}^{B})
+- 2\sum_{i=1}^{n}\sum_{j=1}^{n}cov(y_{i1}^{A}, y_{j2}^{B})
++ 2\sum_{i=1}^{n}\sum_{j=1}^{n}cov(y_{i1}^{B}, y_{j2}^{B})\right) \\
+&= \frac{1}{4n^{2}}\left(n\sigma^{2}
++ n\sigma^{2}
++ n\sigma^{2}
++ n\sigma^{2}
++ 2\sigma^{2}\sum_{i=1}^{n}corr(y_{i1}^{A}, y_{i2}^{A})
+- 0 - 0 - 0 - 0
++ 2\sigma^{2}\sum_{i=1}^{n}corr(y_{i1}^{B}, y_{i2}^{B})\right) \\
+&= \frac{1}{4n^{2}}\left(4n\sigma^{2} + 4n\sigma^{2}\rho\right) \\
+&= \frac{\sigma^{2}(1+\rho)}{n}.
+\end{align*}
+
+\pagebreak
+For the within-subject effect,
+
+\begin{align*}
+var(w) &= var\left(\frac{\bar{y}_{1}^{A} + \bar{y}_{1}^{B}}{2}
+- \frac{\bar{y}_{2}^{A}+\bar{y}_{2}^{B}}{2}\right) \\
+&= \frac{1}{4n^{2}}var\left(\sum_{i=1}^{n}y_{i1}^{A}
++\sum_{i=1}^{n}y_{i1}^{B} - \sum_{i=n}^{n}y_{i2}^{A}
+- \sum_{i=1}^{n}y_{i2}^{B}\right) \\
+&= \frac{1}{4n^{2}}\left(var\left(\sum_{i=1}^{n}y_{i1}^{A}\right)
++ var\left(\sum_{i=1}^{n}y_{i1}^{B}\right)
++ var\left(\sum_{i=n}^{n}y_{i2}^{A}\right)
++ var\left(\sum_{i=1}^{n}y_{i2}^{B}\right)\right. \\
+&\qquad\qquad
++ 2cov\left(\sum_{i=1}^{n}y_{i1}^{A}, \sum_{i=1}^{n}y_{i1}^{B}\right)
+- 2cov\left(\sum_{i=1}^{n}y_{i1}^{A}, \sum_{i=1}^{n}y_{i2}^{A}\right)
+- 2cov\left(\sum_{i=1}^{n}y_{i1}^{A}, \sum_{i=1}^{n}y_{i2}^{B}\right) \\
+&\qquad\qquad
+- \left.2cov\left(\sum_{i=1}^{n}y_{i1}^{B}, \sum_{i=1}^{n}y_{i2}^{A}\right)
+- 2cov\left(\sum_{i=1}^{n}y_{i1}^{B}, \sum_{i=1}^{n}y_{i2}^{B}\right)
++ 2cov\left(\sum_{i=1}^{n}y_{i2}^{A}, \sum_{i=1}^{n}y_{i2}^{B}\right)\right) \\
+&= \frac{1}{4n^{2}}\left(\sum_{i=1}^{n}var(y_{i1}^{A})
++ \sum_{i=1}^{n}var(y_{i1}^{B})
++ \sum_{i=n}^{n}var(y_{i2}^{A})
++ \sum_{i=1}^{n}var(y_{i2}^{B})\right. \\
+&\qquad\qquad
++ 2\sum_{i=1}^{n}\sum_{j=1}^{n}cov(y_{i1}^{A}, y_{j1}^{B})
+- 2\sum_{i=1}^{n}\sum_{j=1}^{n}cov(y_{i1}^{A}, y_{j2}^{A})
+- 2\sum_{i=1}^{n}\sum_{j=1}^{n}cov(y_{i1}^{A}, y_{j2}^{B}) \\
+&\qquad\qquad
+- \left.2\sum_{i=1}^{n}\sum_{j=1}^{n}cov(y_{i1}^{B}, y_{j2}^{A})
+- 2\sum_{i=1}^{n}\sum_{j=1}^{n}cov(y_{i1}^{B}, y_{j2}^{B})
++ 2\sum_{i=1}^{n}\sum_{j=1}^{n}cov(y_{i2}^{A}, y_{j2}^{B})\right) \\
+&= \frac{1}{4n^{2}}\left(n\sigma^{2}
++ n\sigma^{2}
++ n\sigma^{2}
++ n\sigma^{2}
++ 0 - 2\sigma^{2}\sum_{i=1}^{n}corr(y_{i1}^{A}, y_{i2}^{A}) - 0
+- 0 - 2\sigma^{2}\sum_{i=1}^{n}corr(y_{i1}^{B}, y_{i2}^{B}) + 0\right) \\
+&= \frac{1}{4n^{2}}\left(4n\sigma^{2} - 4n\sigma^{2}\rho\right) \\
+&= \frac{\sigma^{2}(1-\rho)}{n}.
+\end{align*}
+
+
+\pagebreak
+\item%2
+{\it Agresti Exercise 9.25 (p.~328). For recent US Presidential elections, in
+each state wealthier voters tend to be more likely to vote Republican, yet
+states that are wealthier in an aggregate sense are more likely to have more
+Democrat than Republican votes (Gelman and Hill 2007, Section 14.2). Sketch
+a plot that illustrates how this instance of Simpson's paradox could occur.
+Specify a GLMM with random effects for states that could be used to analyze
+data for a sample of voters using their state of residence, their household
+income, and their vote in an election. Explain how the model could be
+generalized to allow the income effect to vary by state, to reflect that
+Republican-leaning states tend to have stronger associations between income
+and vote.}
+
+This could occur if the people with more wealth are more likely to vote
+Republican than people in their state with less wealth, but the mean wealth
+differs among states, and people in states that have more wealth on average
+are generally less likely to vote Republican. The plot below illustrates this
+for four hypothetical states. The thin lines show the within-state
+associations for the amounts of wealth present in each state. The thick line
+shows the among-state association, where states that are centered higher on
+the wealth axis have lower mean probabilities of voting Republican.
+
+<<prob2_1, echo = FALSE, fig.height = 4>>=
+@
+
+A GLMM to model this would be
+\begin{align*}
+y_{ij} &\sim \mathrm{Binomial}(1, \pi_{ij}); \\
+\mathrm{logit}(\pi_{i}) &= \beta_{0} + \beta_{1}x_{ij} + u_{0j}, \\
+u_{0j} &\sim \mathrm{N}(0, \sigma^{2}_{0})
+\end{align*}
+for the \(i\)th voter in the \(j\)th state, where \(y_{ij} = 1\) if they voted
+Republican or 0 otherwise, \(x_{ij}\) is their household income, and
+\(u_{0j}\) is a random intercept for state \(j\).
+
+We can allow the strength of the association to change across states by
+including a random slope.
+\begin{align*}
+y_{ij} &\sim \mathrm{Binomial}(1, \pi_{ij}); \\
+\mathrm{logit}(\pi_{i}) &= \beta_{0} + \beta_{1}x_{ij}
++ u_{0j} + u_{1j}x_{ij}, \\
+\begin{pmatrix}u_{0j} \\ u_{1j}\end{pmatrix}
+&\sim \mathrm{N}\left(\begin{pmatrix}0 \\ 0 \end{pmatrix},
+\begin{pmatrix}\sigma^{2}_{0} & \sigma_{12} \\
+\sigma_{12} & \sigma^{2}_{1} \end{pmatrix}\right)
+\end{align*}
+
+
+\item%3
+{\it Agresti Exercise 9.39 (p.~332).}
+
+\begin{enumerate}
+
+\item%a
+{\it Use the GEE approach to fit the logistic model, assuming an exchangeable
+working correlation structure for observations within a litter. Show how the
+empirical sandwich adjustment increases the \(SE\) values compared with naive
+binomial ML. Report the estimated within-litter correlation between the binary
+responses, and compare with the value of 0.192 that yields the
+quasi-likelihood results with beta-binomial variance function.}
+
+The model for the \(j\)th fetus in the \(i\)th litter is
+\begin{align*}
+E(s_{ij}) = \pi_{ij}, \quad Var(s_{ij}) &= \pi_{ij}(1-\pi_{ij}),
+\quad Corr(s_{ij}, s_{i,k}) = \alpha; \\
+\mathrm{logit}(\pi_{ij}) &= \beta_{0} + \beta_{1}z_{i} + \beta_{2}h_{i}
+\end{align*}
+where \(s_{ij} = 1\) if the fetus died and 0 otherwise, \(z_{i} = 1\) if the
+mother of litter \(i\) received a placebo and 0 if she received an iron
+injection, and \(h_{i}\) is the mother's hemoglobin level.
+
+The table below shows that the standard errors from the GEE fit using the
+robust sandwich are about 1.6 times the GLM standard errors. The within-litter
+correlation estimated by GEE is
+\(\widehat{\alpha} = \Sexpr{sprintf('%.4f', rats_gee$geese$alpha)}\), which is
+similar to (but a tiny bit smaller than) the estimated value from Agresti's
+beta-binomial model.
+
+<<prob3a1, echo = FALSE, results = 'asis'>>=
+compare <- cbind(summary(rats_glm)$coefficients[,1:2],
+                 summary(rats_gee)$coefficients[,1:2])
+colnames(compare) <- c('GLM Estimate', 'GLM SE', 'GEE Estimate', 'GEE SE')
+rownames(compare) <- c('\\(\\widehat{\\beta}_{0}\\)',
+                       '\\(\\widehat{\\beta}_{1}\\)',
+                       '\\(\\widehat{\\beta}_{2}\\)')
+xtable(compare, digits = 3, align = '||c|cc|cc||')
+@
+
+\pagebreak
+\item%b
+{\it Fit the GLMM that adds a normal random intercept \(u_{i}\) for litter
+\(i\) to the binomial logistic model. Interpret the estimated effects, and
+explain why they are larger than with the GEE approach.}
+
+The random-intercept model is
+\begin{align*}
+s_{ij}|u_{i} &\sim \mathrm{Binomial}(1, \pi_{ij}); \\
+\mathrm{logit}(\pi_{ij}) &= \beta_{0} + \beta_{1}z_{i} + \beta_{2}h_{i}
++ u_{i}, \\
+u_{i} &\sim \mathrm{N}(0, \sigma^{2}_{u}).
+\end{align*}
+\end{enumerate}
+
+The table below shows the estimated coefficients. The estimated random effect
+variance is \(\widehat{\sigma}^{2}_{u}
+= \Sexpr{sprintf('%.2f', VarCorr(rats_glmm))}\).
+
+<<prob3b1, echo = FALSE, results = 'asis'>>=
+glmmsum <- summary(rats_glmm)$coefficients[,1:2]
+rownames(glmmsum) <- c('\\(\\widehat{\\beta}_{0}\\)',
+                       '\\(\\widehat{\\beta}_{1}\\)',
+                       '\\(\\widehat{\\beta}_{2}\\)')
+xtable(glmmsum, digits = 3, align = '||c|cc||')
+@
+
+\(\widehat{\beta}_{0}\): We estimate that the odds of death are
+\Sexpr{sprintf('%.3f', exp(glmmsum[1, 'Estimate']))}
+for a fetus in a litter from a typical mother who received an iron
+injection and had a hemoglobin level of zero. (Note that hemoglobin levels
+of zero were not observed and probably could not occur.)
+
+\(\widehat{\beta}_{1}\): We estimate that the odds of death are
+\Sexpr{sprintf('%.1f\\%%', 100 * (exp(glmmsum[2, 'Estimate']) - 1))}
+higher for a fetus in a typical litter from a mother who received a placebo
+injection than for a fetus in a typical litter from a mother with the same
+hemoglobin level who received an iron injection.
+
+\(\widehat{\beta}_{2}\): We estimate that the odds of death are
+\Sexpr{sprintf('%.1f\\%%', 100 * (1 - exp(glmmsum[3, 'Estimate'])))}
+lower for a fetus in a typical litter from a mother with a hemoglobin level
+one unit higher than for a fetus in a typical litter from a mother with the
+same treatment status and the lower hemoglobin level.
+
+These effect estimates are larger because they are conditional on the random
+effect, that is, either within one litter observed under different conditions,
+or between litters that fall in the same position within the distribution of
+litters of the same treatment status and mother's hemoglobin level. This in
+in contrast to the marginal effects in part (a) which are more general because
+they are averaged over all of the possible random effects.
+
+\pagebreak
+\item%4
+{\it The Skin Cancer Prevention Study was a randomized, double-blind,
+placebo-controlled clinical trial of beta carotene to prevent non-melanoma
+skin cancer in high risk subjects (Greenberg et al., 1989, 1990; also see
+Stuckel, 1993). A total of 1805 subjects were randomized to either placebo or
+50 mg of beta carotene per day for five years. Subjects were examined once a
+year and biopsied if a cancer was suspected to determine the number of new
+skin cancers occurring since the last exam. The outcome variable is a count of
+the number of new skin cancers per year. The outcome was evaluated on 1683
+subjects comprising a total of 7081 measurements. The main objective of the
+analyses is to compare the effects of beta carotene on skin cancer rates.
+Variables are defined as follows:}
+\begin{center}\begin{tabular}{|l|l|}
+\hline
+ID & Identification number for subject \\
+Center & Center where treated \\
+Age & Age of subject in years \\
+Skin & Skin type (1 = burns; 0 = otherwise) \\
+Gender & 1 = male; 0 = female \\
+Exposure & Count of the number of previous skin cancers \\
+Y & Count of the number of new skin cancers per year \\
+Trt & 1 = beta carotene; 0 = placebo \\
+Year & Year of follow-up \\
+\hline
+\end{tabular}\end{center}
+{\it (We are going to ignore the correlation that may be present with the
+Center variable; do not use the Center variable in any of the following
+analyses.)}
+
+\begin{enumerate}
+
+\item%a
+{\it Consider a Poisson generalized linear mixed model for the
+subject-specific log rate of skin cancers with randomly varying intercepts.
+Fit a model with linear trends for the log rate over time and allow the slopes
+to depend on the treatment group. Do not put any other covariates (besides Trt
+and Year) into the model. Report the fitted model equation.}
+
+The estimated model is
+\begin{align*}
+Y_{ij}|u_{i} &\sim \mathrm{Poisson}(\mu_{ij}); \\
+\log(\widehat{\mu}_{ij})
+&= \Sexpr{sprintf('%.2f', fixef(skin_glmm)['(Intercept)'])}
++ \Sexpr{sprintf('%.4f', fixef(skin_glmm)['Trt'])}\mathrm{Trt}_{i}
+\Sexpr{sprintf('%.6f', fixef(skin_glmm)['Year'])}\mathrm{Year}_{ij}
++ \Sexpr{sprintf('%.4f', fixef(skin_glmm)['Trt:Year'])}
+\mathrm{Trt}_{i}\mathrm{Year}_{ij}
++ \widehat{u}_{i}, \\
+\widehat{u}_{i} &\sim \mathrm{N}(0,
+\Sexpr{sprintf('%.2f', VarCorr(skin_glmm))}).
+\end{align*}
+
+\item%b
+{\it Write an interpretation for each of the estimated fixed effects,
+\(\beta_{j}\).}
+
+\(\widehat{\beta}_{0}\): In year zero, for a typical subject receiving the
+placebo, we estimate the mean number of new skin cancers to be
+\Sexpr{sprintf('%.4f', exp(fixef(skin_glmm)['(Intercept)']))}. (Note that
+the first year observed was year 1, so this interpretation is not appropriate.)
+
+\(\widehat{\beta}_{1}\): In year zero, for a typical subject receiving the
+beta-carotene treatment, we estimate the mean number of new skin cancers to be
+\Sexpr{sprintf('%.2f\\%%', 100 * (exp(fixef(skin_glmm)['Trt']) - 1))}
+higher than the mean number of new skin cancers for a typical subject
+receiving the placebo. (Again, it is not appropriate to interpret year zero.)
+
+\(\widehat{\beta}_{2}\): For a subject receiving the placebo, we estimate the
+mean number of new skin cancers to be
+\Sexpr{sprintf('%.4f\\%%', 100 * (1 - exp(fixef(skin_glmm)['Year'])))}
+lower than the mean number of new skin cancers for that subject in the
+previous year.
+
+\(\widehat{\beta}_{3}\): For a typical subject receiving the beta-carotene
+treatment and a typical subject receiving the placebo, we estimate the
+mean number of new skin cancers for the beta-carotene subject relative to the
+placebo subject to be
+\Sexpr{sprintf('%.2f\\%%', 100 * (exp(fixef(skin_glmm)['Trt:Year']) - 1))}
+higher than in the previous year.
+
+\item%c
+{\it What is the estimate of the standard deviation of the randomly varying
+intercepts? Give an interpretation of this value in context of the problem.}
+
+The estimated standard deviation of the random intercepts is
+\(\widehat{\sigma}_{u} =
+\Sexpr{sprintf('%.2f', attr(VarCorr(skin_glmm)$ID, 'stddev'))}\). For a given
+treatment status and year, we estimate that 95\% of subjects have expected new
+skin cancer counts between
+\Sexpr{sprintf('%.1f\\%%', 100 * (1 - exp(qnorm(0.025) *
+                                  attr(VarCorr(skin_glmm)$ID, 'stddev'))))}
+lower and
+\Sexpr{sprintf('%.1f\\%%', 100 * (exp(qnorm(0.975) *
+                                  attr(VarCorr(skin_glmm)$ID, 'stddev')) - 1))}
+higher than the mean number of new skin cancers for a typical subject.
+
+\item%d
+{\it What conclusions do you draw about the effect of beta carotene on the log
+rate of skin cancers using the model in part (a)? Provide results that support
+your conclusions.}
+
+<<prob4d1, echo = FALSE>>=
+skin_lrt <- anova(skin_glmm_reduced, skin_glmm, test = 'LRT')
+rownames(skin_lrt) <- c('Reduced', 'Full')
+@
+
+I fit a reduced model without the interaction term and treatment main effect,
+so year is the only predictor. The likelihood ratio test provides little to no
+evidence of an association between the beta-carotene treatment and the
+log-rate of new cancers after controlling for year
+(\(\chi^{2}_{\Sexpr{skin_lrt['Full', 'Chi Df']}} =
+\Sexpr{sprintf('%.2f', skin_lrt['Full', 'Chisq'])}\), p-value =
+\Sexpr{sprintf('%.2f', skin_lrt['Full', 'Pr(>Chisq)'])}).
+
+<<prob4d2, echo = FALSE, results = 'asis'>>=
+xtable(skin_lrt[,-(2:4)], digits = c(0, 0, 1, 4, 0, 4), align = '||c|ccccc||')
+@
+
+\item%e
+{\it Obtain the predicted (empirical BLUP) random effect for each subject.
+(Only print the first few BLUPs.)}
+
+<<prob4e1, echo = FALSE, results = 'asis'>>=
+blups <- ranef(skin_glmm)$ID
+colnames(blups) <- '\\(\\widehat{u}_{i}\\)'
+print(xtable(head(blups, n = 10), digits = 3, align = '||cc||'),
+      add.to.row = list(list(-1), '\\hline ID'),
+      hline.after = c(0, 10),
+      sanitize.colnames.function = function(x) x)
+@
+
+\begin{enumerate}
+
+\item%i
+{\it Calculate the sample variance of the predictions. How does it compare to
+the estimate of the variance of the random intercepts obtained from your
+fitted model? Why might they differ?}
+
+The sample variance of the EBLUPs is
+\Sexpr{sprintf('%.2f', var(ranef(skin_glmm)$ID$`(Intercept)`))}, much smaller
+than the parameter estimate \(\sigma^{2}_{u} =
+\Sexpr{sprintf('%.2f', VarCorr(skin_glmm)$ID)}\). They are expected to differ
+slightly because the estimated variance is for the population while the
+sample variance of the EBLUPs depends on the observed counts. A difference
+this large might be due a poor model fit.
+
+\item%ii
+{\it Plot the predictions against age and the count of the number of previous
+skin cancers. What do you conclude from these plots?}
+
+The plots below do not show any trends in the random intercepts across age and
+number of previous cancers, but there are two groups of EBLUP values. We can
+conclude that the predicted random effects do not follow a normal
+distribution.
+
+<<prob4e2, echo = FALSE>>=
+@
+
+\end{enumerate}
+
+\item%f
+{\it Fit a marginal model with the same link and fixed effects as your model
+from part (a), assuming an exchangeable correlation structure. Report the
+fitted model equation and write an interpretation for each of the estimated
+fixed effects, \(\beta_{j}\).}
+
+The estimated model is
+\begin{align*}
+Y_{ij} &\sim \mathrm{Poisson}(\mu_{ij}),
+\quad \widehat{Corr}(Y_{ij}, Y_{ik}) &=
+\Sexpr{sprintf('%.4f', skin_gee$geese$alpha)}; \\
+\log(\widehat{\mu}_{ij})
+&= \Sexpr{sprintf('%.2f', coef(skin_gee)['(Intercept)'])}
++ \Sexpr{sprintf('%.4f', coef(skin_gee)['Trt'])}\mathrm{Trt}_{i}
++ \Sexpr{sprintf('%.6f', coef(skin_gee)['Year'])}\mathrm{Year}_{ij}
++ \Sexpr{sprintf('%.4f', coef(skin_gee)['Trt:Year'])}
+\mathrm{Trt}_{i}\mathrm{Year}_{ij}.
+\end{align*}
+
+\(\widehat{\beta}_{0}\): In year zero, for subjects receiving the placebo, we
+estimate the mean number of new skin cancers to be
+\Sexpr{sprintf('%.4f', exp(coef(skin_gee)['(Intercept)']))}.
+
+\(\widehat{\beta}_{1}\): In year zero, we estimate the mean number of new skin
+cancers for subjects receiving the beta-carotene treatment to be
+\Sexpr{sprintf('%.2f\\%%', 100 * (exp(coef(skin_gee)['Trt']) - 1))}
+higher than the mean number of new skin cancers for subjects receiving the
+placebo.
+
+\(\widehat{\beta}_{2}\): For subjects receiving the placebo, we estimate the
+mean number of new skin cancers to be
+\Sexpr{sprintf('%.4f\\%%', 100 * (exp(coef(skin_gee)['Year']) - 1))}
+higher than the mean number of new skin cancers for subjects receiving the
+placebo in the previous year.
+
+\(\widehat{\beta}_{3}\): We estimate the mean number of new skin cancers for
+the subjects receiving the beta-carotene relative to the placebo subjects
+to be
+\Sexpr{sprintf('%.2f\\%%', 100 * (exp(coef(skin_gee)['Trt:Year']) - 1))}
+higher than in the previous year.
+
+\pagebreak
+\item%g
+{\it For the main objective of the analysis, is a GLMM or marginal model more
+appropriate? Explain.}
+
+For this analysis, marginal models are more appropriate because the goal of
+the study is to see if the beta-carotene treatment would be effective for the
+overall population, not for individuals.
+
+\item%h
+{\it Using the method you chose in part (g), repeat the analysis adjusting for
+skin type, age, and the count of the number of previous skin cancers. What
+conclusions do you draw about the effect of beta carotene on the adjusted log
+rate of skin cancers?}
+
+The model is
+\begin{align*}
+Y_{ij} &\sim \mathrm{Poisson}(\mu_{ij}),
+\quad Corr(Y_{ij}, Y_{ik}) &= \alpha; \\
+\log(\mu_{ij}) &= \beta_{0} + \beta_{1}\mathrm{Skin}_{i}
++ \beta_{2}\mathrm{Age}_{i}
++ \beta_{3}\mathrm{Exposure}_{i}
++ \beta_{4}\mathrm{Trt}_{i}
++ \beta_{5}\mathrm{Year}_{ij}
++ \beta_{6}\mathrm{Trt}_{i}\mathrm{Year}_{ij}.
+\end{align*}
+
+The table below shows the estimated parameters.
+
+<<prob4h1, echo = FALSE, results = 'asis'>>=
+geesum <- summary(skin_gee_full)$coefficients[,1:2]
+rownames(geesum) <- c('\\(\\widehat{\\beta}_{0}\\)',
+                      '\\(\\widehat{\\beta}_{1}\\)',
+                      '\\(\\widehat{\\beta}_{2}\\)',
+                      '\\(\\widehat{\\beta}_{3}\\)',
+                      '\\(\\widehat{\\beta}_{4}\\)',
+                      '\\(\\widehat{\\beta}_{5}\\)',
+                      '\\(\\widehat{\\beta}_{6}\\)')
+xtable(glmmsum, digits = 3, align = '||c|cc||')
+
+gee_wald <- anova(skin_gee_reduced, skin_gee_full)
+@
+
+I fit a reduced model without the treatment by year interaction and the
+treatment main effect. The Wald test provides no evidence of an association
+between the beta-carotene treatment and the log-rate of new cancers after
+controlling for skin type, age, number of previous cancers, and year
+(\(\chi^{2}_{\Sexpr{skin_lrt['Full', 'Chi Df']}} =
+\Sexpr{sprintf('%.2f', gee_wald$X2)}\), p-value =
+\Sexpr{sprintf('%.2f', gee_wald$`P(>|Chi|)`)}).
+
+<<prob4h2, echo = FALSE, results = 'asis'>>=
+print(xtable(gee_wald, digits = c(0, 0, 4, 4), align = 'c||ccc||'),
+      include.rownames = FALSE)
+@
+
+\end{enumerate}
+
+\end{enumerate}
+
+\end{document}
